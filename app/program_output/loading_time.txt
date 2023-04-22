@@ -1,2 +1,2 @@
-total wall time: 1117.99664 seconds
-total cpu time: 284.62922 seconds
+total wall time: 1323.24648 seconds
+total cpu time: 358.88327 seconds
