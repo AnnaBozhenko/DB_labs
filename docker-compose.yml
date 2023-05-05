@@ -19,18 +19,18 @@ services:
             - PGADMIN_DEFAULT_PASSWORD=clientpass
         ports:
             - 5050:80
-    flyway:
-        build: ./app/flyway
-        depends_on:
-              - db
-        # environment:
-        #    - FLYWAY_USER=Student
-        #    - FLYWAY_PASSWORD=qwerty
-        #    - FLYWAY_URL=jdbc:postgresql://postgres:5432/ZNO
-        #    - FLYWAY_SCHEMAS=public
-        volumes:
-           - ./app/flyway/sql:/flyway/sql  
-           - ./app/flyway/flyway-config:/flyway/conf/flyway.config 
+    # flyway:
+    #     build: ./app/flyway
+    #     depends_on:
+    #           - db
+    #     # environment:
+    #     #    - FLYWAY_USER=Student
+    #     #    - FLYWAY_PASSWORD=qwerty
+    #     #    - FLYWAY_URL=jdbc:postgresql://postgres:5432/ZNO
+    #     #    - FLYWAY_SCHEMAS=public
+    #     volumes:
+    #        - ./app/flyway/sql:/flyway/sql  
+    #        - ./app/flyway/flyway-config:/flyway/conf/flyway.config 
         # command: -configFiles=/flyway/flyway.config -locations=filesystem:/flyway/sql -connectRetries=60 migrate
     app:
         build: ./app
@@ -39,4 +39,4 @@ services:
         volumes:
             - ./app/data:/app/data
             - ./app/program_output:/app/program_output
-            - ./app/migrations:/app/migrations
+            # - ./app/migrations:/app/migrations
