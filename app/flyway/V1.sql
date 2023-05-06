@@ -9,7 +9,7 @@ CREATE TABLE Student(
     OutID               SERIAL NOT NULL PRIMARY KEY,
     Birth               SMALLINT NOT NULL,
     SexTypeName         VARCHAR NOT NULL,
-    InstitutionID       SERIAL NULL,
+    InstitutionID       SERIAL NOT NULL,
     RegTypeName         VARCHAR NOT NULL,
     ClassProfileName    VARCHAR NULL,
     ClassLangName       VARCHAR NULL,
@@ -19,7 +19,7 @@ CREATE TABLE Student(
 
 CREATE TABLE UkrTest(
     testID          SERIAL NOT NULL PRIMARY KEY,
-    OutID           SERIAL NOT NULL PRIMARY KEY,
+    OutID           SERIAL NOT NULL,
     UkrAdaptScale   SMALLINT NULL,
     UkrSubTest      BOOLEAN NULL
 );
@@ -27,14 +27,14 @@ CREATE TABLE UkrTest(
 
 CREATE TABLE Test(
     testID          SERIAL NOT NULL PRIMARY KEY,
-    OutID           SERIAL NOT NULL PRIMARY KEY,
+    OutID           SERIAL NOT NULL,
     subject         VARCHAR NULL,
     lang            VARCHAR NULL,
     DPALevel        VARCHAR NULL,
     ball12          NUMERIC(4, 1) NULL,
     ball            NUMERIC(4, 1) NULL,
     ball100         NUMERIC(4, 1) NULL,
-    InstitutionID   SERIAL NULL,
+    InstitutionID   SERIAL NOT NULL,
     testStatus      VARCHAR NULL,
     testYear        SMALLINT NOT NULL
 );
