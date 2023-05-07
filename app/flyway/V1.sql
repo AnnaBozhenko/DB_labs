@@ -5,14 +5,6 @@ DROP TABLE IF EXISTS Institution;
 DROP TABLE IF EXISTS LocationInfo;
 
 
-CREATE TABLE LocationInfo(
-    locationID          SERIAL NOT NULL PRIMARY KEY,
-    regionName          VARCHAR NULL,
-    areaName            VARCHAR NULL,
-    territoryName       VARCHAR NULL
-);
-
-
 CREATE TABLE Institution(
     InstitutionID       SERIAL NOT NULL PRIMARY KEY,
     locationID          SERIAL NOT NULL REFERENCES LocationInfo(locationID),
@@ -34,17 +26,16 @@ CREATE TABLE Student(
 
 
 CREATE TABLE UkrTest(
-    testID          SERIAL NOT NULL,
+    testID          SERIAL NOT NULL PRIMARY KEY(testID, OutID),
     OutID           SERIAL NOT NULL REFERENCES Student(OutID),
     UkrAdaptScale   SMALLINT NULL,
-    UkrSubTest      BOOLEAN NULL,
-    PRIMARY KEY(testID, OutID)
+    UkrSubTest      BOOLEAN NULL
 );
 
 
 CREATE TABLE Test(
-    testID          SERIAL NOT NULL,
-    OutID           SERIAL NOT NULL,
+    testID          SERIAL NOT NULL PRIMARY KEY,
+    OutID           SERIAL NOT NULL PRIMARY KEY,
     subject         VARCHAR NULL,
     lang            VARCHAR NULL,
     DPALevel        VARCHAR NULL,
@@ -53,7 +44,22 @@ CREATE TABLE Test(
     ball100         NUMERIC(4, 1) NULL,
     InstitutionID   SERIAL NOT NULL REFERENCES Institution(InstitutionID),
     testStatus      VARCHAR NULL,
-    testYear        SMALLINT NOT NULL,
-    PRIMARY KEY(testID, OutID)
+    testYear        SMALLINT NOT NULL
 );
 
+
+CREATE TABLE Institution(
+    InstitutionID       SERIAL NOT NULL PRIMARY KEY,
+    locationID          SERIAL NOT NULL,
+    parent              VARCHAR NOT NULL,
+    institutionType     VARCHAR NULL
+);
+
+
+CREATE TABLE LocationInfo(
+    locationID          SERIAL NOT NULL PRIMARY KEY,
+    regionName          VARCHAR NULL,
+    areaName            VARCHAR NULL,
+    territoryName       VARCHAR NULL,
+    territoryType       VARCHAR NULL
+);
