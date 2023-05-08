@@ -18,10 +18,30 @@ UNION SELECT DISTINCT    fraptregname, fraptareaname, frapttername          FROM
 UNION SELECT DISTINCT    mathptregname, mathptareaname, mathpttername       FROM Examinations;
 
 
+INSERT INTO Institution(institutionName, parent, institutionType)
+SELECT DISTINCT  eoname, eoparent, eotypename    FROM Examinations
+UNION SELECT DISTINCT chemptname, NULL, NULL     FROM Examinations
+UNION SELECT DISTINCT fraptname, NULL, NULL      FROM Examinations
+UNION SELECT DISTINCT spaptname, NULL, NULL      FROM Examinations
+UNION SELECT DISTINCT ukrptname, NULL, NULL      FROM Examinations
+UNION SELECT DISTINCT deuptname, NULL, NULL      FROM Examinations
+UNION SELECT DISTINCT engptname, NULL, NULL      FROM Examinations
+UNION SELECT DISTINCT mathptname, NULL, NULL     FROM Examinations
+UNION SELECT DISTINCT umlptname, NULL, NULL      FROM Examinations
+UNION SELECT DISTINCT histptname, NULL, NULL     FROM Examinations
+UNION SELECT DISTINCT geoptname, NULL, NULL      FROM Examinations
+UNION SELECT DISTINCT rusptname, NULL, NULL      FROM Examinations
+UNION SELECT DISTINCT bioptname, NULL, NULL      FROM Examinations
+UNION SELECT DISTINCT physptname, NULL, NULL     FROM Examinations
+UNION SELECT DISTINCT mathstptname, NULL, NULL   FROM Examinations;
 
 
+UPDATE Institution
+SET locationID = LocationInfo.locationID
+WHERE Examinations.regname = LocationInfo.regionName AND
+      Examinations.areaname = LocationInfo.areaName  AND
+      Examinations.tername = LocationInfo.territoryName;
 
--- INSERT INTO Institution(InstitutionID, locationID, parent, institutionType)
 --
 --
 --
