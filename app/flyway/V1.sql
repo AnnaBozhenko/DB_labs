@@ -5,6 +5,14 @@ DROP TABLE IF EXISTS Institution;
 DROP TABLE IF EXISTS LocationInfo;
 
 
+CREATE TABLE LocationInfo(
+    locationID          SERIAL NOT NULL PRIMARY KEY,
+    regionName          VARCHAR NULL,
+    areaName            VARCHAR NULL,
+    territoryName       VARCHAR NULL,
+    territoryType       VARCHAR NULL
+);
+
 CREATE TABLE Institution(
     InstitutionID       SERIAL NOT NULL PRIMARY KEY,
     locationID          SERIAL NOT NULL REFERENCES LocationInfo(locationID),
@@ -48,18 +56,4 @@ CREATE TABLE Test(
 );
 
 
-CREATE TABLE Institution(
-    InstitutionID       SERIAL NOT NULL PRIMARY KEY,
-    locationID          SERIAL NOT NULL,
-    parent              VARCHAR NOT NULL,
-    institutionType     VARCHAR NULL
-);
 
-
-CREATE TABLE LocationInfo(
-    locationID          SERIAL NOT NULL PRIMARY KEY,
-    regionName          VARCHAR NULL,
-    areaName            VARCHAR NULL,
-    territoryName       VARCHAR NULL,
-    territoryType       VARCHAR NULL
-);
