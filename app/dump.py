@@ -1,6 +1,7 @@
 import psycopg2
 import csv
 import time
+from generate_queries import *
 
 # Порівняти найгірший бал з Української мови та літератури у кожному регіоні у 2020 та
 # 2021 роках серед тих кому було зараховано тест
@@ -40,9 +41,8 @@ db_host = "db"
 
 loading_time = "./program_output/loading_time.txt"
 query_to_db = "./program_output/queries.csv"
-ddl_commands = "./migrations/V1__create_examinations.sql"
-dml_commands = "./migrations/V2__populate_examinations.sql"
-create_schema = "create_schema.sql"
+baseline_name = "./flyway/sql/V1__initial_schema.sql"
+migrations_name ="./flyway/sql/V2__migrations.sql"
 
 rows_to_write_numb = 1000
 DB_POPULATED = False
@@ -54,6 +54,13 @@ extract_data = [(2016, "./data/OpenData2016.csv", "cp1251"),
                 (2021, "./data/Odata2021File.csv", "utf-8-sig")]
 
 # --------- FUNCTIONALITY ----------
+def write_to_file(file_path, content):
+    """file_path - str, path of file to write to;
+    content - str, content to write to file.
+    returns nothing, writes content to file."""
+    with open(file_path, mode="a") as f:
+        f.write('\n' + content + '\n')
+
 
 def get_type(name):
     """name - str;
@@ -175,10 +182,14 @@ def prepare_tables(conn):
     
     with conn.cursor() as cur:
         cur.execute(query_create_exams)
+        write_to_file(baseline_name, query_create_exams)
         cur.execute(query_create_insert_log)
+        write_to_file(baseline_name, query_create_insert_log)
         cur.execute("select count(*) from insertlog;")
         if cur.fetchone()[0] == 0:
-            cur.execute(f"insert into InsertLog (year, inserted_rows_n, insertion_time) values {', '.join(['%s']*len(extract_data))}", [(info[0], 0, 0) for info in extract_data])
+            query = cur.mogrify(f"insert into InsertLog (year, inserted_rows_n, insertion_time) values {', '.join(['%s']*len(extract_data))}", [(info[0], 0, 0) for info in extract_data])
+            cur.execute(query)
+            write_to_file(baseline_name, query.decode())
 
 
 @transaction
@@ -206,18 +217,23 @@ def populate_examinations(conn):
                     if rows_n > 0:
                         rows = [tuple([f(x) for f, x in zip(formatters, row)]) for row in rows]
                         
-                        query = f"INSERT INTO Examinations ({', '.join(column_names)}) VALUES {', '.join(['%s']*rows_n)};"
-                        cur.execute(query, rows)
+                        query = cur.mogrify(f"INSERT INTO Examinations ({', '.join(column_names)}) VALUES {', '.join(['%s']*rows_n)};", rows)
+                        cur.execute(query)
+                        write_to_file(baseline_name, query.decode())
+
                         cur.execute("select inserted_rows_n, insertion_time FROM InsertLog where year = %s;", (year,))
                         total_rows, insertion_time = cur.fetchone()
                         total_rows += rows_n
                         insertion_time = float(insertion_time) + time.time() - start_time
-                        cur.execute("UPDATE InsertLog SET inserted_rows_n = %s, insertion_time = %s WHERE year = %s;", (total_rows, insertion_time, year))
+                        query = cur.mogrify("UPDATE InsertLog SET inserted_rows_n = %s, insertion_time = %s WHERE year = %s;", (total_rows, insertion_time, year))
+                        cur.execute(query)
+                        write_to_file(baseline_name, query.decode())
                         conn.commit()
 
                         start_time = time.time()
                     else:
                         break
+
 
 if __name__ == "__main__":
     prepare_tables()
@@ -225,3 +241,13 @@ if __name__ == "__main__":
     print("Table examinations populated")
     write_time()
     write_query()
+    write_to_file(migrations_name, q_create_locationInfo())
+    write_to_file(migrations_name, q_create_institution())
+    write_to_file(migrations_name, q_create_student())
+    write_to_file(migrations_name, q_create_test())
+    query = """
+drop table examinations;
+drop table insertLog;
+"""
+    write_to_file(migrations_name, query)
+    print("Migrations script generated")

@@ -20,18 +20,18 @@ services:
         ports:
             - 5050:80
     # flyway:
-    #     build: ./app/flyway
+    #     image: flyway/flyway:9-alpine
     #     depends_on:
     #           - db
-    #     # environment:
-    #     #    - FLYWAY_USER=Student
-    #     #    - FLYWAY_PASSWORD=qwerty
-    #     #    - FLYWAY_URL=jdbc:postgresql://postgres:5432/ZNO
-    #     #    - FLYWAY_SCHEMAS=public
+    #           - app
+    #     environment:
+    #        - FLYWAY_USER=Student
+    #        - FLYWAY_PASSWORD=qwerty
+    #        - FLYWAY_URL=jdbc:postgresql://db:5432/ZNO
+    #        - FLYWAY_SCHEMAS=public
     #     volumes:
-    #        - ./app/flyway/sql:/flyway/sql  
-    #        - ./app/flyway/flyway-config:/flyway/conf/flyway.config 
-        # command: -configFiles=/flyway/flyway.config -locations=filesystem:/flyway/sql -connectRetries=60 migrate
+    #        - ./app/flyway/sql:/flyway/sql 
+    #     command: -locations=filesystem:/flyway/sql -baselineVersion=1 -baselineDescription=initial_schema -connectRetries=60 baseline
     app:
         build: ./app
         depends_on:
@@ -39,4 +39,7 @@ services:
         volumes:
             - ./app/data:/app/data
             - ./app/program_output:/app/program_output
-            # - ./app/migrations:/app/migrations
+            - ./app/flyway/sql:/app/flyway/sql
+
+#volumes:
+#    pgdata:
