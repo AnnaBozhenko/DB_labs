@@ -59,8 +59,8 @@ WHERE Examinations.eoname = Institution.institutionName AND
       Examinations.eotypename = Institution.institutionType;
 
 
--- INSERT INTO UkrTest(OutID, UkrAdaptScale, UkrSubTest)
--- SELECT DISTINCT   stid,
+INSERT INTO UkrTest(OutID, UkrAdaptScale, UkrSubTest)
+SELECT DISTINCT  stid, ukradaptscale, ukrsubtest FROM Examinations;
 --
 
 --
