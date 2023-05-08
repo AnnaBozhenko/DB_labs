@@ -43,7 +43,7 @@ CREATE TABLE UkrTest(
 
 CREATE TABLE Test(
     testID          SERIAL NOT NULL PRIMARY KEY,
-    OutID           SERIAL NOT NULL PRIMARY KEY,
+    OutID           SERIAL NOT NULL REFERENCES Student(OutID),
     subject         VARCHAR NULL,
     lang            VARCHAR NULL,
     DPALevel        VARCHAR NULL,
