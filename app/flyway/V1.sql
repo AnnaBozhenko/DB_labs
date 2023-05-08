@@ -9,8 +9,7 @@ CREATE TABLE LocationInfo(
     locationID          SERIAL NOT NULL PRIMARY KEY,
     regionName          VARCHAR NULL,
     areaName            VARCHAR NULL,
-    territoryName       VARCHAR NULL,
-    territoryType       VARCHAR NULL
+    territoryName       VARCHAR NULL
 );
 
 CREATE TABLE Institution(
