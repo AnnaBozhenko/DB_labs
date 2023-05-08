@@ -14,6 +14,7 @@ CREATE TABLE LocationInfo(
 
 CREATE TABLE Institution(
     InstitutionID       SERIAL NOT NULL PRIMARY KEY,
+    institutionName     VARCHAR NOT NULL,
     locationID          SERIAL NOT NULL REFERENCES LocationInfo(locationID),
     parent              VARCHAR NOT NULL,
     institutionType     VARCHAR NULL
