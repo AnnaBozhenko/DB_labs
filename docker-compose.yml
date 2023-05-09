@@ -9,8 +9,6 @@ services:
             - POSTGRES_PASSWORD=qwerty
         ports:
             - 5432:5432/tcp
-        #volumes: 
-        #    - pgdata:/var/lib/postgresql/data
     db_client:
         image: dpage/pgadmin4
         restart: always
@@ -19,19 +17,14 @@ services:
             - PGADMIN_DEFAULT_PASSWORD=clientpass
         ports:
             - 5050:80
-    # flyway:
-    #     image: flyway/flyway:9-alpine
-    #     depends_on:
-    #           - db
-    #           - app
-    #     environment:
-    #        - FLYWAY_USER=Student
-    #        - FLYWAY_PASSWORD=qwerty
-    #        - FLYWAY_URL=jdbc:postgresql://db:5432/ZNO
-    #        - FLYWAY_SCHEMAS=public
-    #     volumes:
-    #        - ./app/flyway/sql:/flyway/sql 
-    #     command: -locations=filesystem:/flyway/sql -baselineVersion=1 -baselineDescription=initial_schema -connectRetries=60 baseline
+    flyway:
+          image: flyway/flyway:9-alpine
+          depends_on:
+             - db
+          volumes:
+             - ./app/flyway/sql:/flyway/sql
+             - ./app/flyway/conf:/flyway/conf
+          command: -configFiles=/flyway/conf/flyway.conf migrate
     app:
         build: ./app
         depends_on:
@@ -40,6 +33,3 @@ services:
             - ./app/data:/app/data
             - ./app/program_output:/app/program_output
             - ./app/flyway/sql:/app/flyway/sql
-
-#volumes:
-#    pgdata:
