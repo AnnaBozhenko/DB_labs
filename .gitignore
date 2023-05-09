@@ -1,8 +1,11 @@
 # sql-files
-.sql
+app/flyway/sql/
 
 # data files
-.csv
+app/data/
+
+# time-log-file
+app/program_output/loading_time.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
