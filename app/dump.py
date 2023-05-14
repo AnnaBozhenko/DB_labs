@@ -32,6 +32,17 @@ query_create_insert_log = """create table if not exists InsertLog (
     insertion_time numeric(10, 5)
 );"""
 
+new_task = """SELECT LocationInfo.regionName, ROUND(AVG(Test.ball100)::NUMERIC, 2), Test.testYear 
+FROM LocationInfo, TEST 
+WHERE Test.subject = 'Англійська мова'
+AND Test.testStatus = 'Зараховано'
+AND Test.testYear IN (2019, 2020)
+AND Test.OutID = Student.OutID
+AND Student.locationID = LocationInfo.locationID
+GROUP BY LocationInfo.regionName
+"""
+
+
 # --------- VALUES ----------
 
 db_user = "Student"
@@ -43,6 +54,7 @@ loading_time = "./program_output/loading_time.txt"
 query_to_db = "./program_output/queries.csv"
 baseline_name = "./flyway/sql/V1__initial_schema.sql"
 migrations_name ="./flyway/sql/V2__migrations.sql"
+new_query_to_db = "./program_output/new_queries.csv"
 
 rows_to_write_numb = 1000
 DB_POPULATED = False
@@ -233,21 +245,30 @@ def populate_examinations(conn):
                         start_time = time.time()
                     else:
                         break
+        print('Insertion is finished for {} year'.format(year))
+
 
 
 if __name__ == "__main__":
     prepare_tables()
+    print('Table is prepared')
     populate_examinations()
     print("Table examinations populated")
     write_time()
     write_query()
-    write_to_file(migrations_name, q_create_locationInfo())
-    write_to_file(migrations_name, q_create_institution())
-    write_to_file(migrations_name, q_create_student())
-    write_to_file(migrations_name, q_create_test())
-    query = """
-drop table examinations;
-drop table insertLog;
-"""
-    write_to_file(migrations_name, query)
-    print("Migrations script generated")
+    print('App from lab 1 finished to work')
+    # write_query(new_task, new_query_to_db)
+    # print('Lab 2 for var 14 finished to work')
+#     write_to_file(migrations_name, q_create_locationInfo())
+#     write_to_file(migrations_name, q_create_institution())
+#     write_to_file(migrations_name, q_create_student())
+#     write_to_file(migrations_name, q_create_test())
+#     query = """
+# drop table examinations;
+# drop table insertLog;
+# """
+#     write_to_file(migrations_name, query)
+#     print("Migrations script generated")
+
+
+# docker compose up app db
