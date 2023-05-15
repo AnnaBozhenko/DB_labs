@@ -2,6 +2,8 @@ import psycopg2
 import csv
 import time
 from generate_queries import *
+from os import remove
+from os.path import exists
 
 # Порівняти найгірший бал з Української мови та літератури у кожному регіоні у 2020 та
 # 2021 роках серед тих кому було зараховано тест
@@ -250,6 +252,7 @@ def populate_examinations(conn):
 
 
 if __name__ == "__main__":
+    [remove(file_name) for file_name in [baseline_name, migrations_name] if exists(file_name)]
     prepare_tables()
     print('Table is prepared')
     populate_examinations()
