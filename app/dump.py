@@ -55,7 +55,11 @@ db_host = "db"
 loading_time = "./program_output/loading_time.txt"
 query_to_db = "./program_output/queries.csv"
 baseline_name = "./flyway/sql/V1__initial_schema.sql"
-migrations_name ="./flyway/sql/V2__migrations.sql"
+locations_info_fn ="./flyway/sql/V2__create_locations_info.sql"
+institution_fn = "./flyway/sql/V3__create_institution.sql"
+student_fn = "./flyway/sql/V4__create_student.sql"
+test_fn = "./flyway/sql/V5__create_test.sql"
+cleaning_fn = "./flyway/sql/V6_cleaning_helpful_tables.sql"
 new_query_to_db = "./program_output/new_queries.csv"
 
 rows_to_write_numb = 1000
@@ -252,7 +256,7 @@ def populate_examinations(conn):
 
 
 if __name__ == "__main__":
-    [remove(file_name) for file_name in [baseline_name, migrations_name] if exists(file_name)]
+    [remove(file_name) for file_name in [baseline_name, locations_info_fn, institution_fn, student_fn, test_fn, cleaning_fn] if exists(file_name)]
     prepare_tables()
     print('Table is prepared')
     populate_examinations()
@@ -262,16 +266,16 @@ if __name__ == "__main__":
     print('App from lab 1 finished to work')
     # write_query(new_task, new_query_to_db)
     # print('Lab 2 for var 14 finished to work')
-#     write_to_file(migrations_name, q_create_locationInfo())
-#     write_to_file(migrations_name, q_create_institution())
-#     write_to_file(migrations_name, q_create_student())
-#     write_to_file(migrations_name, q_create_test())
-#     query = """
-# drop table examinations;
-# drop table insertLog;
-# """
-#     write_to_file(migrations_name, query)
-#     print("Migrations script generated")
+    write_to_file(locations_info_fn, q_create_locationInfo())
+    write_to_file(institution_fn, q_create_institution())
+    write_to_file(student_fn, q_create_student())
+    write_to_file(test_fn, q_create_test())
+    query = """
+drop table examinations;
+drop table insertLog;
+"""
+    write_to_file(cleaning_fn, query)
+    print("Migrations script generated")
 
 
 # docker compose up app db
