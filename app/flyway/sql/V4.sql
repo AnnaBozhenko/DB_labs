@@ -34,3 +34,5 @@ ON Examinations.eoregname = LocationInfo.regionName AND
 
 
 ALTER TABLE Institution ADD COLUMN InstitutionID SERIAL PRIMARY KEY;
+ALTER TABLE Institution ADD CONSTRAINT fk_location  FOREIGN KEY(locationID) REFERENCES  LocationInfo(locationID);
+

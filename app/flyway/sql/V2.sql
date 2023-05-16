@@ -17,8 +17,7 @@ CREATE TABLE Institution(
     institutionName     VARCHAR,
     locationID          INTEGER,
     parent              VARCHAR,
-    institutionType     VARCHAR,
-    FOREIGN KEY(locationID) REFERENCES LocationInfo(locationID)
+    institutionType     VARCHAR
 );
 
 
@@ -48,6 +47,5 @@ CREATE TABLE Test(
     ball100         NUMERIC(4, 1),
     InstitutionID   INTEGER,
     testStatus      VARCHAR,
-    testYear        SMALLINT NOT NULL,
-    FOREIGN KEY(OutID) REFERENCES Student(OutID)
+    testYear        SMALLINT NOT NULL
 );

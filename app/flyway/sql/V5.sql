@@ -34,5 +34,9 @@ ON Examinations.eoname = Institution.institutionName AND
    Examinations.eoparent = Institution.parent  AND
    Examinations.eotypename = Institution.institutionType;
 
+ALTER TABLE Student ADD CONSTRAINT fk_location  FOREIGN KEY(locationID) REFERENCES  LocationInfo(locationID);
+ALTER TABLE Student ADD CONSTRAINT fk_location  FOREIGN KEY(InstitutionID) REFERENCES  Institution(InstitutionID);
 
-ALTER TABLE Student ADD CONSTRAINT fk_institution FOREIGN KEY(InstitutionID) REFERENCES Institution(InstitutionID);
+
+
+
