@@ -12,6 +12,10 @@ def q_create_locationInfo():
 from examinations""" for a, r, t in zip(areas, regions, territories)]) + ");\n\n"
     q += "alter table LocationInfo add column locationId serial primary key;\n"
     return q
+
+def create_index_on_locationinfo():
+    q = "create index if not exists locInfo on locationInfo(areaName, regName, terName);\n\n"
+    return q
     
 def q_create_institution():
     q = """create table if not exists Institution as 
@@ -34,13 +38,13 @@ from examinations
 inner join LocationInfo on 
     LocationInfo.areaName = examinations.{test}ptareaname and
     LocationInfo.regName = examinations.{test}ptregname and
-    LocationInfo.terName = examinations.{test}pttername)""" for test in TESTS]) + ";\n\n"
-    q += "alter table Institution add column instId serial primary key;\n\n"
-    q += "alter table Institution add constraint fk_location foreign key (locationId) references LocationInfo (locationId);\n\n"
+    LocationInfo.terName = examinations.{test}pttername)""" for test in TESTS]) + ";\n"
+    q += """
+alter table Institution add column instId serial primary key;
+alter table Institution add constraint fk_location foreign key (locationId) references LocationInfo (locationId);\n"""
     return q
 
-
-def q_create_student():
+def q_create_student_1():
     q = """create table if not exists Student as
 (select 
     outId,
@@ -58,12 +62,15 @@ from examinations
 inner join LocationInfo on
     LocationInfo.areaname = examinations.areaname and
     LocationInfo.regname = examinations.regname and
-    LocationInfo.tername = examinations.tername);\n\n"""
-    q += "alter table Student add column instId integer;\n\n"
-    q += """update Student
-    set instId = temp.instId
-from
-(select 
+    LocationInfo.tername = examinations.tername);
+
+alter table Student add column instId integer;"""
+    return q
+
+def q_create_student_2():
+    q = """
+create table if not exists temp as
+select 
     instId,
     instName,
     areaName,
@@ -71,12 +78,25 @@ from
     terName
 from Institution 
 inner join LocationInfo on
-    Institution.locationId = LocationInfo.locationId) temp
+    Institution.locationId = LocationInfo.locationId;
+    
+create index if not exists temp_inst on temp(instName, areaName, regName, terName);"""
+    return q
+
+def q_create_student_3():
+    q = """
+update Student
+    set instId = temp.instId
+from temp
 where temp.instName = Student.eoname and
       temp.areaName = Student.eoareaname and
       temp.regName = Student.eoregname and
-      temp.terName = Student.eotername;\n"""
-    q += """
+      temp.terName = Student.eotername;"""
+    return q
+    
+def q_create_student_4():
+    q = """
+drop table temp;
 alter table Student drop column eoname;
 alter table Student drop column eoareaname;
 alter table Student drop column eoregname;
@@ -87,159 +107,244 @@ alter table Student add constraint fk_location foreign key (locationId) referenc
 alter table Student add constraint fk_institution foreign key (instId) references Institution (instId);\n"""
     return q
 
+def q_create_test_1():
+    q = """
+create table if not exists test 
+   (instId     integer,
+    testYear   smallint,
+    adaptScale smallint,
+    ball12     numeric(4, 1),
+    ball100    numeric(4, 1),
+    ball       numeric(4, 1),
+    subtest    boolean,
+    outid      varchar,
+    testName   varchar,
+    dpaLevel   varchar,
+    testLang   varchar,
+    testStatus varchar);
 
-# create tables for each test seperatly and then unite them into one table
-def q_create_test():
-    q = """create table if not exists Test as
-(select 
-    outId,
-    testYear,
-    ukradaptscale as adaptScale,
-    ukrsubtest as subtest,
-    ukrtest as testName,
-    ukrball12 as ball12,
-    ukrball100 as ball100,
-    ukrball as ball,
-    NULL as dpalevel,
-    NULL as testLang,
-    ukrteststatus as testStatus,
-    ukrptname as instName,
-    ukrptareaname as instAreaName,
-    ukrptregname as instRegName,
-    ukrpttername as instTerName
-from examinations)\n union \n"""
-    q += """(select 
-    outId,
-    testYear,
-    NULL as adaptScale,
-    NULL as subtest,
-    umltest as testName,
-    umlball12 as ball12,
-    umlball100 as ball100,
-    umlball as ball,
-    NULL as dpalevel,
-    NULL as testLang,
-    umlteststatus as testStatus,
-    umlptname as instName,
-    umlptareaname as instAreaName,
-    umlptregname as instRegName,
-    umlpttername as instTerName
-from examinations)\n union \n"""
-    q += "\n union \n".join([f"""(select 
-    outId,
-    testYear,
-    NULL as adaptScale,
-    NULL as subtest,
-    {test}test as testName,
-    {test}ball12 as ball12,
-    {test}ball100 as ball100,
-    {test}ball as ball,
-    NULL as dpalevel,
-    {test}lang as testLang,
-    {test}teststatus as testStatus,
-    {test}ptname as instName,
-    {test}ptareaname as instAreaName,
-    {test}ptregname as instRegName,
-    {test}pttername as instTerName
-from examinations)""" for test in ['geo', 'bio', 'hist', 'phys', 'chem']])
-    q += "\n union \n" + "\n union \n".join([f"""(select 
-    outId,
-    testYear,
-    NULL as adaptScale,
-    NULL as subtest,
-    {test}test as testName,
-    {test}ball12 as ball12,
-    {test}ball100 as ball100,
-    {test}ball as ball,
-    {test}dpalevel as dpalevel,
-    NULL as testLang,
-    {test}teststatus as testStatus,
-    {test}ptname as instName,
-    {test}ptareaname as instAreaName,
-    {test}ptregname as instRegName,
-    {test}pttername as instTerName
-from examinations)""" for test in ['eng', 'fr', 'sp', 'deu']])
-    q += """
- union
-(select 
-    outId,
-    testYear,
-    NULL as adaptScale,
-    NULL as subtest,
-    mathtest as testName,
-    mathball12 as ball12,
-    mathball100 as ball100,
-    mathball as ball,
-    mathdpalevel as dpalevel,
-    mathlang as testLang,
-    mathteststatus as testStatus,
-    mathptname as instName,
-    mathptareaname as instAreaName,
-    mathptregname as instRegName,
-    mathpttername as instTerName
-from examinations)
- union
-(select 
-    outId,
-    testYear,
-    NULL as adaptScale,
-    NULL as subtest,
-    mathsttest as testName,
-    mathstball12 as ball12,
-    NULL as ball100,
-    mathstball as ball,
-    NULL as dpalevel,
-    mathstlang as testLang,
-    mathstteststatus as testStatus,
-    mathstptname as instName,
-    mathstptareaname as instAreaName,
-    mathstptregname as instRegName,
-    mathstpttername as instTerName
-from examinations)
- union
-(select 
-    outId,
-    testYear,
-    NULL as adaptScale,
-    NULL as subtest,
-    rustest as testName,
-    rusball12 as ball12,
-    rusball100 as ball100,
-    NULL as ball,
-    NULL as dpalevel,
-    NULL as testLang,
-    rusteststatus as testStatus,
-    rusptname as instName,
-    rusptareaname as instAreaName,
-    rusptregname as instRegName,
-    ruspttername as instTerName
-from examinations);\n\n"""
-    q += "alter table Test add column testId serial;\n\n"
-    q += "alter table Test add column instId integer;\n\n"
-    q += """update Test
-    set instId = temp.instId
-from (select 
-    instId,
-    instName,
-    areaName,
-    regName,
-    terName
-from Institution
-inner join LocationInfo on
-    Institution.locationId = LocationInfo.locationId) temp
-where Test.instName = temp.instName and
-    Test.instAreaName = temp.areaName and
-    Test.instRegName = temp.regName and
-    Test.instTerName = temp.terName;\n"""
-    q += """
-alter table Test drop column instName;
-alter table Test drop column instAreaName;
-alter table Test drop column instRegName;
-alter table Test drop column instTerName;
+-- populate with ukr-test
+insert into test 
+    (instId,    
+    testYear,  
+    adaptScale,
+    ball12,    
+    ball100,   
+    ball,      
+    subtest,   
+    outid,     
+    testName,  
+    testStatus) 
+select
+    instId,    
+    testYear,  
+    ukradaptScale,
+    ukrball12,    
+    ukrball100,   
+    ukrball,      
+    ukrsubtest,   
+    outid,     
+    ukrtest,  
+    ukrtestStatus
+from examinations 
+inner join locationInfo ON
+    ukrptareaname = locationInfo.areaName AND
+    ukrptregname = locationInfo.regName AND
+    ukrpttername = locationInfo.terName
+inner join institution on 
+    institution.instname = ukrptname AND
+    institution.locationId = locationInfo.locationId;
 
+-- populate with uml-test
+insert into test
+(instId,    
+    testYear,  
+    ball12,    
+    ball100,   
+    ball,      
+    outid,     
+    testName,  
+    testStatus)
+select
+instId,    
+    testYear,  
+    umlball12,    
+    umlball100,   
+    umlball,      
+    outid,     
+    umltest,  
+    umltestStatus
+from examinations
+inner join locationInfo ON
+    umlptareaname = locationInfo.areaName AND
+    umlptregname = locationInfo.regName AND
+    umlpttername = locationInfo.terName
+inner join institution on 
+    institution.instname = umlptname AND
+    institution.locationId = locationInfo.locationId;
+
+-- populate with math-test
+insert into test
+(   instId,    
+    testYear,  
+    ball12,    
+    ball100,   
+    ball,      
+    outid,     
+    testName,  
+    dpaLevel,  
+    testLang,  
+    testStatus)
+select
+    instId,    
+    testYear,  
+    mathball12,    
+    mathball100,   
+    mathball,      
+    outid,     
+    mathtest,  
+    mathdpaLevel,  
+    mathlang,  
+    mathtestStatus
+from examinations
+inner join locationInfo ON
+    mathptareaname = locationInfo.areaName AND
+    mathptregname = locationInfo.regName AND
+    mathpttername = locationInfo.terName
+inner join institution on 
+    institution.instname = mathptname AND
+    institution.locationId = locationInfo.locationId;
+
+-- populate with mathst-test
+insert into test
+    (instId,    
+    testYear,  
+    ball12,    
+    ball,      
+    outid,     
+    testName,  
+    testLang,  
+    testStatus)
+select
+    instId,    
+    testYear,  
+    mathstball12,    
+    mathstball,      
+    outid,     
+    mathsttest,  
+    mathstlang,  
+    mathsttestStatus
+from examinations
+inner join locationInfo ON
+    mathstptareaname = locationInfo.areaName AND
+    mathstptregname = locationInfo.regName AND
+    mathstpttername = locationInfo.terName
+inner join institution on 
+    institution.instname = mathstptname AND
+    institution.locationId = locationInfo.locationId;
+
+-- populate with rus-test
+insert into test
+    (instId,    
+    testYear,  
+    ball12,    
+    ball100,   
+    outid,     
+    testName,  
+    testStatus)
+select 
+    instId,    
+    testYear,  
+    rusball12,    
+    rusball100,   
+    outid,     
+    rustest,  
+    rustestStatus 
+from examinations
+inner join locationInfo ON
+    rusptareaname = locationInfo.areaName AND
+    rusptregname = locationInfo.regName AND
+    ruspttername = locationInfo.terName
+inner join institution on 
+    institution.instname = rusptname AND
+    institution.locationId = locationInfo.locationId;
+"""
+    q += "".join([f"""
+insert into test
+    (instId,    
+    testYear,  
+    ball12,    
+    ball100,   
+    ball,      
+    outid,     
+    testName,
+    testLang,  
+    testStatus)
+select 
+    instId,    
+    testYear,  
+    {test}ball12,    
+    {test}ball100,   
+    {test}ball,      
+    outid,     
+    {test}test,
+    {test}lang,  
+    {test}testStatus
+from examinations
+inner join locationInfo ON
+    {test}ptareaname = locationInfo.areaName AND
+    {test}ptregname = locationInfo.regName AND
+    {test}pttername = locationInfo.terName
+inner join institution on 
+    institution.instname = {test}ptname AND
+    institution.locationId = locationInfo.locationId;
+""" for test in ['geo', 'bio', 'hist', 'phys', 'chem']])
+    q += "".join([f"""
+insert into test
+    (instId,    
+    testYear,  
+    ball12,    
+    ball100,   
+    ball,      
+    outid,     
+    testName,  
+    dpaLevel,  
+    testStatus)
+select 
+    instId,    
+    testYear,  
+    {test}ball12,    
+    {test}ball100,   
+    {test}ball,      
+    outid,     
+    {test}test,  
+    {test}dpaLevel,  
+    {test}testStatus
+from examinations
+inner join locationInfo ON
+    {test}ptareaname = locationInfo.areaName AND
+    {test}ptregname = locationInfo.regName AND
+    {test}pttername = locationInfo.terName
+inner join institution on 
+    institution.instname = {test}ptname AND
+    institution.locationId = locationInfo.locationId;
+""" for test in ['eng', 'fr', 'sp', 'deu']])
+    return q
+
+def q_create_test_2():
+    q = """
 delete from Test where testname is null;
+alter table Test add column testId serial;
 
 alter table Test add constraint pk_test_student primary key (outId, testId);
--- alter table Test add constraint fk_institution foreign key (instId) references Institution (instId);
--- alter table Test add constraint fk_student foreign key (outId) references Student (outId);\n\n"""
+alter table Test add constraint fk_institution foreign key (instId) references Institution (instId);
+alter table Test add constraint fk_student foreign key (outId) references Student (outId);\n\n"""
+    return q
+
+def q_clean_unnecessary_structures():
+    q = """
+drop index locInfo;
+drop table examinations;
+drop table insertlog;
+"""
     return q
