@@ -14,43 +14,31 @@ CREATE TABLE LocationInfo(
 );
 
 CREATE TABLE Institution(
-    InstitutionID       SERIAL NOT NULL,
     institutionName     VARCHAR,
     locationID          INTEGER,
     parent              VARCHAR,
-    institutionType     VARCHAR,
-    PRIMARY KEY(InstitutionID),
-    FOREIGN KEY(locationID) REFERENCES LocationInfo(locationID)
+    institutionType     VARCHAR
 );
 
 
 CREATE TABLE Student(
-    OutID               SERIAL NOT NULL,
+    OutID               VARCHAR NOT NULL,
     Birth               SMALLINT NOT NULL,
     SexTypeName         VARCHAR NOT NULL,
     InstitutionID       INTEGER,
     RegTypeName         VARCHAR NOT NULL,
     ClassProfileName    VARCHAR,
     ClassLangName       VARCHAR,
+    UkrAdaptScale       SMALLINT,
+    UkrSubTest          BOOLEAN,
     locationID          INTEGER,
-    PRIMARY KEY(OutID),
-    FOREIGN KEY(InstitutionID) REFERENCES Institution(InstitutionID)
+    PRIMARY KEY(OutID)
 );
 
-
-CREATE TABLE UkrTest(
-    testID          SERIAL NOT NULL,
-    OutID           INTEGER NOT NULL,
-    UkrAdaptScale   SMALLINT,
-    UkrSubTest      BOOLEAN,
-    PRIMARY KEY(testID, OutID),
-    FOREIGN KEY(OutID) REFERENCES Student(OutID)
-);
 
 
 CREATE TABLE Test(
-    testID          SERIAL NOT NULL,
-    OutID           INTEGER NOT NULL,
+    OutID           VARCHAR NOT NULL,
     subject         VARCHAR,
     lang            VARCHAR,
     DPALevel        VARCHAR,
@@ -59,8 +47,5 @@ CREATE TABLE Test(
     ball100         NUMERIC(4, 1),
     InstitutionID   INTEGER,
     testStatus      VARCHAR,
-    testYear        SMALLINT NOT NULL,
-    PRIMARY KEY(testID, OutID),
-    FOREIGN KEY(OutID) REFERENCES Student(OutID),
-    FOREIGN KEY(InstitutionID) REFERENCES Institution(InstitutionID)
+    testYear        SMALLINT NOT NULL
 );
