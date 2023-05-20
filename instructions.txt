@@ -15,7 +15,7 @@
         2. створіть в директорії app/flyway директорію sql 
         3. запустіть в терміналі команду docker compose up app db
         4. дочекайтеся завершення роботи додатку
-        5. запустіть в терміналі команду docker compose flyway
+        5. запустіть в терміналі команду docker compose up flyway
         6. моніторте стан бази:
                 6.1 командою docker exec -ti <db image id> sh
                 6.2 у відкритому shell контейнера бази введіть: psql -U Student -d ZNO
