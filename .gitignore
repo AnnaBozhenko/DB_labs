@@ -1,5 +1,6 @@
 # sql-files
 app/flyway/sql/
+app/flyway/migrations/
 
 # data files
 app/data/
