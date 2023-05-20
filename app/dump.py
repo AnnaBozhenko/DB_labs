@@ -54,12 +54,18 @@ db_host = "db"
 
 loading_time = "./program_output/loading_time.txt"
 query_to_db = "./program_output/queries.csv"
-baseline_name = "./flyway/sql/V1__initial_schema.sql"
-locations_info_fn ="./flyway/sql/V2__create_locations_info.sql"
-institution_fn = "./flyway/sql/V3__create_institution.sql"
-student_fn = "./flyway/sql/V4__create_student.sql"
-test_fn = "./flyway/sql/V5__create_test.sql"
-cleaning_fn = "./flyway/sql/V6_cleaning_helpful_tables.sql"
+migration1_name = "./flyway/migrations/V1__initial_schema.sql"
+migration2_name = "./flyway/migrations/V2__create_locationInfo_table.sql"
+migration3_name = "./flyway/migrations/V3__create_index_on_locationinfo.sql"
+migration4_name = "./flyway/migrations/V4__create_institution_table.sql"
+migration5_name = "./flyway/migrations/V5__create_student_table.sql"
+migration6_name = "./flyway/migrations/V6__create_helpful_table_for_student_t_update.sql"
+migration7_name = "./flyway/migrations/V7__update_student_table.sql"
+migration8_name = "./flyway/migrations/V8__drop_helpful_structures_for_student_t.sql"
+migration9_name = "./flyway/migrations/V9__create_test_table.sql"
+migration10_name = "./flyway/migrations/V10__alter_test.sql"
+migration11_name = "./flyway/migrations/V11__drop_source_structures.sql"
+
 new_query_to_db = "./program_output/new_queries.csv"
 
 rows_to_write_numb = 1000
@@ -200,14 +206,14 @@ def prepare_tables(conn):
     
     with conn.cursor() as cur:
         cur.execute(query_create_exams)
-        write_to_file(baseline_name, query_create_exams)
+        write_to_file(migration1_name, query_create_exams)
         cur.execute(query_create_insert_log)
-        write_to_file(baseline_name, query_create_insert_log)
+        write_to_file(migration1_name, query_create_insert_log)
         cur.execute("select count(*) from insertlog;")
         if cur.fetchone()[0] == 0:
             query = cur.mogrify(f"insert into InsertLog (year, inserted_rows_n, insertion_time) values {', '.join(['%s']*len(extract_data))}", [(info[0], 0, 0) for info in extract_data])
             cur.execute(query)
-            write_to_file(baseline_name, query.decode())
+            write_to_file(migration1_name, query.decode())
 
 
 @transaction
@@ -237,7 +243,7 @@ def populate_examinations(conn):
                         
                         query = cur.mogrify(f"INSERT INTO Examinations ({', '.join(column_names)}) VALUES {', '.join(['%s']*rows_n)};", rows)
                         cur.execute(query)
-                        write_to_file(baseline_name, query.decode())
+                        write_to_file(migration1_name, query.decode())
 
                         cur.execute("select inserted_rows_n, insertion_time FROM InsertLog where year = %s;", (year,))
                         total_rows, insertion_time = cur.fetchone()
@@ -245,7 +251,7 @@ def populate_examinations(conn):
                         insertion_time = float(insertion_time) + time.time() - start_time
                         query = cur.mogrify("UPDATE InsertLog SET inserted_rows_n = %s, insertion_time = %s WHERE year = %s;", (total_rows, insertion_time, year))
                         cur.execute(query)
-                        write_to_file(baseline_name, query.decode())
+                        write_to_file(migration1_name, query.decode())
                         conn.commit()
 
                         start_time = time.time()
@@ -256,25 +262,36 @@ def populate_examinations(conn):
 
 
 if __name__ == "__main__":
-    [remove(file_name) for file_name in [baseline_name, locations_info_fn, institution_fn, student_fn, test_fn, cleaning_fn] if exists(file_name)]
+    [remove(file_name) for file_name in [migration1_name, 
+                                         migration2_name, 
+                                         migration3_name, 
+                                         migration4_name, 
+                                         migration5_name, 
+                                         migration6_name, 
+                                         migration7_name, 
+                                         migration8_name, 
+                                         migration9_name, 
+                                         migration10_name,
+                                         migration11_name] if exists(file_name)]
     prepare_tables()
     print('Table is prepared')
     populate_examinations()
     print("Table examinations populated")
-    write_time()
-    write_query()
-    print('App from lab 1 finished to work')
+    # write_time()
+    # write_query()
+    # print('App from lab 1 finished to work')
     # write_query(new_task, new_query_to_db)
     # print('Lab 2 for var 14 finished to work')
-    write_to_file(locations_info_fn, q_create_locationInfo())
-    write_to_file(institution_fn, q_create_institution())
-    write_to_file(student_fn, q_create_student())
-    write_to_file(test_fn, q_create_test())
-    query = """
-drop table examinations;
-drop table insertLog;
-"""
-    write_to_file(cleaning_fn, query)
+    write_to_file(migration2_name , q_create_locationInfo())         
+    write_to_file(migration3_name , create_index_on_locationinfo())
+    write_to_file(migration4_name , q_create_institution())
+    write_to_file(migration5_name , q_create_student_1())
+    write_to_file(migration6_name , q_create_student_2())
+    write_to_file(migration7_name , q_create_student_3())
+    write_to_file(migration8_name , q_create_student_4())
+    write_to_file(migration9_name , q_create_test_1())
+    write_to_file(migration10_name , q_create_test_2())
+    write_to_file(migration11_name, q_clean_unnecessary_structures())
     print("Migrations script generated")
 
 
