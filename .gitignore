@@ -1,9 +1,8 @@
 # sql-files
-app/flyway/sql/
-app/flyway/migrations/
+app/flyway/sql/*.sql
 
 # data files
-app/data/
+app/data/*.csv
 
 # time-log-file
 app/program_output/loading_time.txt
