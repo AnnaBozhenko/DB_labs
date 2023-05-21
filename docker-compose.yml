@@ -1,40 +1,47 @@
 version: '3.8'
-# services:
-#   app:
-#     build: ./app/
-#     depends_on:
-#       - db
-#     volumes:
-#       - './app/data:/app/data'
-#       - './app/program_output:/app/program_output'
-#       - './app/flyway/sql:/app/flyway/sql'
-#     networks:
-#       - test
-#   db:
-#     image: postgres:13
-#     restart: always
-#     environment:
-#       - POSTGRES_USER=Student
-#       - POSTGRES_PASSWORD=qwerty
-#       - POSTGRES_DB=ZNO
-#     ports:
-#       - '5432:5432'
-#     networks:
-#       - test
-#   flyway:
-#     image: flyway/flyway:7
-#     depends_on:
-#       - db
-#     command: -configFiles=/flyway/conf/flyway.conf migrate
-#     volumes:
-#       - './app/flyway/conf:/flyway/conf'
-#       - './app/flyway/sql:/flyway/sql'
+services:
+    app:
+        build: ./app/
+    depends_on:
+        - db
+    volumes:
+        - './app/data:/app/data'
+        - './app/program_output:/app/program_output'
+        - './app/flyway/sql:/app/flyway/sql'
+    networks:
+         - test
+    db:
+        image: postgres:13
+        restart: always
+        environment:
+            - POSTGRES_USER=Student
+            - POSTGRES_PASSWORD=qwerty
+            - POSTGRES_DB=ZNO
+        ports:
+            - '5432:5432'
+        networks:
+            - test
+    flyway:
+        image: flyway/flyway:7
+        depends_on:
+            - db
+        command: -configFiles=/flyway/conf/flyway.conf migrate
+        volumes:
+            - './app/flyway/conf:/flyway/conf'
+            - './app/flyway/sql:/flyway/sql'
+    result_app:
+        build:
+            context: ./result_app
+            dockerfile: Dockerfile
+        volumes:
+            - '../app/program_output:/program_output'
+        depends_on:
+            - db
+        networks:
+            - test
 
-#     networks:
-#       - test
-
-# networks:
-#   test:
+#networks:
+#  test:
 
 services:
     db:
@@ -65,36 +72,30 @@ services:
         depends_on:
             - db
         volumes:
-            - './app/flyway/migrate_existing/conf:/flyway/conf'
-            - './app/flyway/migrate_existing/sql:/flyway/sql'
-        command: 
-            -c -configFiles=/flyway/conf/flyway.conf migrate
+            - './app/flyway/conf:/flyway/conf'
+            - './app/flyway/sql:/flyway/sql'
+        command: -configFiles=/flyway/conf/flyway.conf migrate
         networks:
             - test
     app:
-        build: 
-            context: ./app
-            dockerfile: Dockerfile
+        build: ./app
         depends_on:
            - db
         volumes:
            - './app/data:/app/data'
            - './app/program_output:/app/program_output'
-           - './app/flyway/migrate_existing/sql:/app/flyway/migrate_existing/sql'
+           - './app/flyway/sql:/app/flyway/sql'
         networks:
             - test
-# flyway container for migrating from 0
-    migrate:
-            build:
-                context: ./app
-                dockerfile: migrate_existing.Dockerfile
-            depends_on:
-                - db
-            volumes:
-                - './app/program_output:/app/program_output'
-            networks:
-                - test
-
+    result_app:
+        build:
+            context: ./result_app
+            dockerfile: Dockerfile
+        volumes:
+            - '../app/program_output:/program_output'
+        depends_on:
+            - db
+        
 
 networks:
     test:
