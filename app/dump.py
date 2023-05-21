@@ -34,15 +34,6 @@ query_create_insert_log = """create table if not exists InsertLog (
     insertion_time numeric(10, 5)
 );"""
 
-new_task = """SELECT LocationInfo.regionName, ROUND(AVG(Test.ball100)::NUMERIC, 2), Test.testYear 
-FROM LocationInfo, TEST 
-WHERE Test.subject = 'Англійська мова'
-AND Test.testStatus = 'Зараховано'
-AND Test.testYear IN (2019, 2020)
-AND Test.OutID = Student.OutID
-AND Student.locationID = LocationInfo.locationID
-GROUP BY LocationInfo.regionName
-"""
 
 
 # --------- VALUES ----------
@@ -66,7 +57,6 @@ migration9_name = "./flyway/migrations/V9__create_test_table.sql"
 migration10_name = "./flyway/migrations/V10__alter_test.sql"
 migration11_name = "./flyway/migrations/V11__drop_source_structures.sql"
 
-new_query_to_db = "./program_output/new_queries.csv"
 
 rows_to_write_numb = 1000
 DB_POPULATED = False
@@ -76,6 +66,7 @@ extract_data = [(2016, "./data/OpenData2016.csv", "cp1251"),
                 (2019, "./data/Odata2019File.csv", "cp1251"),
                 (2020, "./data/Odata2020File.csv", "cp1251"),
                 (2021, "./data/Odata2021File.csv", "utf-8-sig")]
+
 
 # --------- FUNCTIONALITY ----------
 def write_to_file(file_path, content):
@@ -94,7 +85,7 @@ def get_type(name):
         return "numeric(4, 1)"
     elif name == "ukrsubtest":
         return "boolean"
-    elif any([name == el for el in["ukradaptscale", "birth", "testyear"]]):
+    elif any([name == el for el in ["ukradaptscale", "birth", "testyear"]]):
         return "smallint"
     else:
         return "varchar"
@@ -107,7 +98,7 @@ def format_value(column_name):
     if "ball" in column_name:
         return lambda x: float(x.replace(",", ".")) if x != "null" else None
     elif column_name == "ukrsubtest":
-        return lambda x: None if x == "null" else True if x.lower() =="так" else False
+        return lambda x: None if x == "null" else True if x.lower() == "так" else False
     elif any([column_name == el for el in ["ukradaptscale", "birth", "testyear"]]):
         return lambda x: int(x) if x != "null" else None
     else:
@@ -119,7 +110,7 @@ def format_column(name):
     returns formatted to standart column name."""
     name = name.lower()
     name = name[:2] + name[3:] if len(name) > 3 and (name[:3] == 'fra' or name[:3] == 'spa') else name
-    return name 
+    return name
 
 
 def get_query_create_examinations():
@@ -128,13 +119,13 @@ def get_query_create_examinations():
     for year, filename, encoding in extract_data:
         with open(filename, encoding=encoding) as f:
             reader = csv.reader(f, delimiter=";")
-            columns_names += [format_column(el) for el in next(reader)]    
+            columns_names += [format_column(el) for el in next(reader)]
 
     columns_types = [(el, get_type(el)) for el in set(columns_names + ["testyear"])]
     sorted_columns_types = []
     for type in ["boolean", "smallint", "numeric(4, 1)", "varchar"]:
         [sorted_columns_types.append((c_name, c_type)) for c_name, c_type in columns_types if c_type == type]
-    sorted_columns_types = ", ".join([c_name +" "+ c_type for c_name, c_type in sorted_columns_types])
+    sorted_columns_types = ", ".join([c_name + " " + c_type for c_name, c_type in sorted_columns_types])
 
     query = "CREATE TABLE IF NOT EXISTS Examinations (" + sorted_columns_types + ");"
     return query
@@ -142,6 +133,7 @@ def get_query_create_examinations():
 
 def transaction(func):
     """wrapper function for functions which use connection sessions to postgres"""
+
     def inner(*args, **kwargs):
         conn = None
         while True:
@@ -164,6 +156,7 @@ def transaction(func):
             finally:
                 if conn is not None:
                     conn.close()
+
     return inner
 
 
@@ -176,7 +169,7 @@ def write_time(conn):
         wall_time = cur.fetchone()[0]
         with open(loading_time, 'w') as f:
             f.write(f"total wall time: {wall_time} seconds\n")
-        
+
 
 @transaction
 def write_query(conn):
@@ -196,14 +189,14 @@ def write_query(conn):
 def prepare_tables(conn):
     """conn - psycopg2 Connection object;
     the function:
-        - creates tables neccessary for database: 
+        - creates tables neccessary for database:
             - examination table (examinations' data);
-            - insertlog table (information on insert to examinations table: 
+            - insertlog table (information on insert to examinations table:
             number of rows inserted and total insertion time for specific year),
         - populates insertlog table with default initial rows, where each row corresponds to each year insert info.
     returns true in case of complete database population."""
     query_create_exams = get_query_create_examinations()
-    
+
     with conn.cursor() as cur:
         cur.execute(query_create_exams)
         write_to_file(migration1_name, query_create_exams)
@@ -211,7 +204,9 @@ def prepare_tables(conn):
         write_to_file(migration1_name, query_create_insert_log)
         cur.execute("select count(*) from insertlog;")
         if cur.fetchone()[0] == 0:
-            query = cur.mogrify(f"insert into InsertLog (year, inserted_rows_n, insertion_time) values {', '.join(['%s']*len(extract_data))}", [(info[0], 0, 0) for info in extract_data])
+            query = cur.mogrify(
+                f"insert into InsertLog (year, inserted_rows_n, insertion_time) values {', '.join(['%s'] * len(extract_data))}",
+                [(info[0], 0, 0) for info in extract_data])
             cur.execute(query)
             write_to_file(migration1_name, query.decode())
 
@@ -225,23 +220,26 @@ def populate_examinations(conn):
         with open(filename, encoding=encoding) as f:
             reader = csv.reader(f, delimiter=";")
             column_names = next(reader) + ['testyear']
-            column_names = [format_column(el) for el in column_names] 
+            column_names = [format_column(el) for el in column_names]
             formatters = [format_value(c) for c in column_names]
-                        
+
             with conn.cursor() as cur:
                 start_time = time.time()
                 cur.execute(f"SELECT inserted_rows_n FROM InsertLog where year = {year};")
                 read_rows_n = cur.fetchone()[0]
-                
+
                 [next(reader) for _ in range(read_rows_n)]
-                
+
                 while True:
-                    rows = [row + [year] for row in [next(reader, None) for _ in range(rows_to_write_numb)] if row is not None]
+                    rows = [row + [year] for row in [next(reader, None) for _ in range(rows_to_write_numb)] if
+                            row is not None]
                     rows_n = len(rows)
                     if rows_n > 0:
                         rows = [tuple([f(x) for f, x in zip(formatters, row)]) for row in rows]
-                        
-                        query = cur.mogrify(f"INSERT INTO Examinations ({', '.join(column_names)}) VALUES {', '.join(['%s']*rows_n)};", rows)
+
+                        query = cur.mogrify(
+                            f"INSERT INTO Examinations ({', '.join(column_names)}) VALUES {', '.join(['%s'] * rows_n)};",
+                            rows)
                         cur.execute(query)
                         write_to_file(migration1_name, query.decode())
 
@@ -249,7 +247,9 @@ def populate_examinations(conn):
                         total_rows, insertion_time = cur.fetchone()
                         total_rows += rows_n
                         insertion_time = float(insertion_time) + time.time() - start_time
-                        query = cur.mogrify("UPDATE InsertLog SET inserted_rows_n = %s, insertion_time = %s WHERE year = %s;", (total_rows, insertion_time, year))
+                        query = cur.mogrify(
+                            "UPDATE InsertLog SET inserted_rows_n = %s, insertion_time = %s WHERE year = %s;",
+                            (total_rows, insertion_time, year))
                         cur.execute(query)
                         write_to_file(migration1_name, query.decode())
                         conn.commit()
@@ -260,17 +260,16 @@ def populate_examinations(conn):
         print('Insertion is finished for {} year'.format(year))
 
 
-
 if __name__ == "__main__":
-    [remove(file_name) for file_name in [migration1_name, 
-                                         migration2_name, 
-                                         migration3_name, 
-                                         migration4_name, 
-                                         migration5_name, 
-                                         migration6_name, 
-                                         migration7_name, 
-                                         migration8_name, 
-                                         migration9_name, 
+    [remove(file_name) for file_name in [migration1_name,
+                                         migration2_name,
+                                         migration3_name,
+                                         migration4_name,
+                                         migration5_name,
+                                         migration6_name,
+                                         migration7_name,
+                                         migration8_name,
+                                         migration9_name,
                                          migration10_name,
                                          migration11_name] if exists(file_name)]
     prepare_tables()
@@ -280,19 +279,17 @@ if __name__ == "__main__":
     # write_time()
     # write_query()
     # print('App from lab 1 finished to work')
-    # write_query(new_task, new_query_to_db)
-    # print('Lab 2 for var 14 finished to work')
-    write_to_file(migration2_name , q_create_locationInfo())         
-    write_to_file(migration3_name , create_index_on_locationinfo())
-    write_to_file(migration4_name , q_create_institution())
-    write_to_file(migration5_name , q_create_student_1())
-    write_to_file(migration6_name , q_create_student_2())
-    write_to_file(migration7_name , q_create_student_3())
-    write_to_file(migration8_name , q_create_student_4())
-    write_to_file(migration9_name , q_create_test_1())
-    write_to_file(migration10_name , q_create_test_2())
+    write_to_file(migration2_name, q_create_locationInfo())
+    write_to_file(migration3_name, create_index_on_locationinfo())
+    write_to_file(migration4_name, q_create_institution())
+    write_to_file(migration5_name, q_create_student_1())
+    write_to_file(migration6_name, q_create_student_2())
+    write_to_file(migration7_name, q_create_student_3())
+    write_to_file(migration8_name, q_create_student_4())
+    write_to_file(migration9_name, q_create_test_1())
+    write_to_file(migration10_name, q_create_test_2())
     write_to_file(migration11_name, q_clean_unnecessary_structures())
     print("Migrations script generated")
 
-
 # docker compose up app db
+# docker compose up flyway
