@@ -345,6 +345,8 @@ def q_clean_unnecessary_structures():
     q = """
 drop index locInfo;
 drop table examinations;
-drop table insertlog;
 """
     return q
+
+
+        

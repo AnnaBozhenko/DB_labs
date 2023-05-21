@@ -47,6 +47,8 @@ services:
         ports:
             - 5432:5432/tcp
         command: -c max_wal_size=5GB
+        networks:
+            - test
     db_client:
         image: dpage/pgadmin4
         restart: always
@@ -55,14 +57,20 @@ services:
            - PGADMIN_DEFAULT_PASSWORD=clientpass
         ports:
            - 5050:80
+        networks:
+            - test
+# flyway container for magrating from existing database 
     flyway:
         image: flyway/flyway:7
         depends_on:
             - db
         volumes:
-            - './app/flyway/conf:/flyway/conf'
-            - './app/flyway/migrations:/flyway/sql'
-        command: -configFiles=/flyway/conf/flyway.conf migrate
+            - './app/flyway/migrate_existing/conf:/flyway/conf'
+            - './app/flyway/migrate_existing/sql:/flyway/sql'
+        command: 
+            -c -configFiles=/flyway/conf/flyway.conf migrate
+        networks:
+            - test
     app:
         build: 
             context: ./app
@@ -72,4 +80,21 @@ services:
         volumes:
            - './app/data:/app/data'
            - './app/program_output:/app/program_output'
-           - './app/flyway/migrations:/app/flyway/migrations'
+           - './app/flyway/migrate_existing/sql:/app/flyway/migrate_existing/sql'
+        networks:
+            - test
+# flyway container for migrating from 0
+    migrate:
+            build:
+                context: ./app
+                dockerfile: migrate_existing.Dockerfile
+            depends_on:
+                - db
+            volumes:
+                - './app/program_output:/app/program_output'
+            networks:
+                - test
+
+
+networks:
+    test:
