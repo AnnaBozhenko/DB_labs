@@ -1,5 +1,5 @@
 # sql-files
-*.sql
+app/flyway/*.sql
 
 # data files
 app/data/*.csv
