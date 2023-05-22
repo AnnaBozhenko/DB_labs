@@ -13,6 +13,7 @@ AND test.testyear IN (2019, 2020)
 GROUP BY testyear, regname;
 """
 
+
 task_3 = """SELECT regname, MIN(ball100), testyear 
 FROM test 
 INNER JOIN student ON test.outid = student.outid 
@@ -23,12 +24,15 @@ AND test.testyear IN (2020, 2021)
 GROUP BY testyear, regname;
 """
 
+query_to_db_14 = "./result_output/result_14.csv"
+query_to_db_3 = "./result_output/result_3.csv"
 
 db_user = "Student"
 db_pass = "qwerty"
 db_name = "ZNO"
 db_host = "db"
 db_port = '5432'
+
 
 def connected(username, password, database, host, port):
     while True:
@@ -40,42 +44,26 @@ def connected(username, password, database, host, port):
             print('Trying to connect to database ... again..')
             time.sleep(5)
 
-query_to_db_14 = "result_14.csv"
-query_to_db_3 = "result_3.csv"
 
-def var_14():
+def main(query, file):
     conn = connected(db_user, db_pass, db_name, db_host, db_port)
     with conn.cursor() as cur:
-        print('Start work!')
-        cur.execute(task_14)
+        cur.execute(query)
         fields = [x[0] for x in cur.description]
-        print('query execute')
-        with open(query_to_db_14.format(), 'w', encoding='windows-1251', newline='') as outfile:
+        with open(file, 'w', encoding='windows-1251', newline='') as outfile:
             writer = csv.writer(outfile)
             writer.writerow(fields)
             for row in cur:
                 writer.writerow([str(x).replace(' ', '') for x in row])
-    conn.close()
-
-
-def var_3():
-    conn = connected(db_user, db_pass, db_name, db_host, db_port)
-    with conn.cursor() as cur:
-        print('Start work!')
-        cur.execute(task_3)
-        fields = [x[0] for x in cur.description]
-        print('query execute')
-        with open(query_to_db_3.format(), 'w', encoding='windows-1251', newline='') as outfile:
-            writer = csv.writer(outfile)
-            writer.writerow(fields)
-            for row in cur:
-                writer.writerow([str(x).replace(' ', '') for x in row])
+        print('Written to the file')
     conn.close()
 
 
 if __name__ == '__main__':
     try:
-        var_14()
-        var_3()
+        main(task_14, query_to_db_14)
+        main(task_3, query_to_db_3)
     except Exception as e:
         print(e)
+
+# docker compose up result_app
