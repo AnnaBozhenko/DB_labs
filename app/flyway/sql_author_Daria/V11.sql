@@ -1,3 +1,0 @@
-ALTER TABLE Test ADD COLUMN testID SERIAL;
-ALTER TABLE Test ADD CONSTRAINT pk_test_student PRIMARY KEY(outID, testID);
-ALTER TABLE Test ADD CONSTRAINT fk_institution  FOREIGN KEY(InstitutionID) REFERENCES Institution(InstitutionID);
