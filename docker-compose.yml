@@ -24,7 +24,7 @@ services:
             - db
         volumes:
             - './app/flyway/conf:/flyway/conf'
-            - './app/flyway/migrations:/flyway/sql'
+            - './app/flyway/sql:/flyway/sql'
         command: -configFiles=/flyway/conf/flyway.conf migrate
     app:
         build:
@@ -35,7 +35,7 @@ services:
         volumes:
            - './app/data:/app/data'
            - './app/program_output:/app/program_output'
-           - './app/flyway/migrations:/app/flyway/migrations'
+           - './app/flyway/sql:/app/flyway/sql'
     result_app:
         build:
             context: ./result_app
