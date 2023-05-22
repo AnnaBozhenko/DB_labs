@@ -5,36 +5,12 @@ from generate_queries import *
 from os import remove
 from os.path import exists
 
-# Порівняти найгірший бал з Української мови та літератури у кожному регіоні у 2020 та
-# 2021 роках серед тих кому було зараховано тест
-comparison_query = """
-select 
-	regname,
-	min_ball_100_from_2020,
-	min_ball_100_from_2021
-from
-(select 
- 	regname,
-	min(ukrball100) as min_ball_100_from_2020
- 	from examinations 
- 	where examinations.testyear = 2020 and ukrteststatus = 'Зараховано'
-	group by regname) as statistics2020
-join 
-(select 
-	regname,
- 	min(ukrball100) as min_ball_100_from_2021
-	from examinations 
- 	where examinations.testyear = 2021 and ukrteststatus = 'Зараховано'
-	group by regname) as statistics2021
-using(regname);"""
-
+# ----- QUERIES -----
 query_create_insert_log = """create table if not exists InsertLog (
     year smallint primary key,
     inserted_rows_n integer,
     insertion_time numeric(10, 5)
 );"""
-
-
 
 # --------- VALUES ----------
 
@@ -44,22 +20,20 @@ db_name = "ZNO"
 db_host = "db"
 
 loading_time = "./program_output/loading_time.txt"
-query_to_db = "./program_output/queries.csv"
-migration1_name = "./flyway/migrations/V1__initial_schema.sql"
-migration2_name = "./flyway/migrations/V2__create_locationInfo_table.sql"
-migration3_name = "./flyway/migrations/V3__create_index_on_locationinfo.sql"
-migration4_name = "./flyway/migrations/V4__create_institution_table.sql"
-migration5_name = "./flyway/migrations/V5__create_student_table.sql"
-migration6_name = "./flyway/migrations/V6__create_helpful_table_for_student_t_update.sql"
-migration7_name = "./flyway/migrations/V7__update_student_table.sql"
-migration8_name = "./flyway/migrations/V8__drop_helpful_structures_for_student_t.sql"
-migration9_name = "./flyway/migrations/V9__create_test_table.sql"
-migration10_name = "./flyway/migrations/V10__alter_test.sql"
-migration11_name = "./flyway/migrations/V11__drop_source_structures.sql"
 
+migration1_name = "./flyway/sql/V1__initial_schema.sql"
+migration2_name = "./flyway/sql/V2__create_locationInfo_table.sql"
+migration3_name = "./flyway/sql/V3__create_index_on_locationinfo.sql"
+migration4_name = "./flyway/sql/V4__create_institution_table.sql"
+migration5_name = "./flyway/sql/V5__create_student_table.sql"
+migration6_name = "./flyway/sql/V6__create_helpful_table_for_student_t_update.sql"
+migration7_name = "./flyway/sql/V7__update_student_table.sql"
+migration8_name = "./flyway/sql/V8__drop_helpful_structures_for_student_t.sql"
+migration9_name = "./flyway/sql/V9__create_test_table.sql"
+migration10_name = "./flyway/sql/V10__alter_test.sql"
+migration11_name = "./flyway/sql/V11__drop_source_structures.sql"
 
 rows_to_write_numb = 1000
-DB_POPULATED = False
 extract_data = [(2016, "./data/OpenData2016.csv", "cp1251"),
                 (2017, "./data/OpenData2017.csv", "utf-8-sig"),
                 (2018, "./data/OpenData2018.csv", "utf-8-sig"),
@@ -74,7 +48,7 @@ def write_to_file(file_path, content):
     content - str, content to write to file.
     returns nothing, writes content to file."""
     with open(file_path, mode="a") as f:
-        f.write('\n' + content + '\n')
+        f.write(content + '\n')
 
 
 def get_type(name):
@@ -96,13 +70,13 @@ def format_value(column_name):
     returns function to typecast value, which belongs to the column column_name."""
     column_name = column_name.lower()
     if "ball" in column_name:
-        return lambda x: float(x.replace(",", ".")) if x != "null" else None
+        return lambda x: x.replace(",", ".")
     elif column_name == "ukrsubtest":
-        return lambda x: None if x == "null" else True if x.lower() == "так" else False
+        return lambda x: x if x == "null" else "true" if x.lower() =="так" else "false"
     elif any([column_name == el for el in ["ukradaptscale", "birth", "testyear"]]):
-        return lambda x: int(x) if x != "null" else None
+        return lambda x: x
     else:
-        return lambda x: x if x != "null" else None
+        return lambda x: "\'" + x.replace("'", "''") + "\'"  if x != "null" else "null"
 
 
 def format_column(name):
@@ -172,20 +146,6 @@ def write_time(conn):
 
 
 @transaction
-def write_query(conn):
-    """conn - psycopg2 Connection object;
-    the function performs given query to database and in case of receiving the result writes it to the file."""
-    with conn.cursor() as cur:
-        cur.execute(comparison_query)
-        rows = cur.fetchall()
-        column_names = [el[0] for el in cur.description]
-        with open(query_to_db, "w", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(column_names)
-            [writer.writerow(row) for row in rows]
-
-
-@transaction
 def prepare_tables(conn):
     """conn - psycopg2 Connection object;
     the function:
@@ -201,15 +161,12 @@ def prepare_tables(conn):
         cur.execute(query_create_exams)
         write_to_file(migration1_name, query_create_exams)
         cur.execute(query_create_insert_log)
-        write_to_file(migration1_name, query_create_insert_log)
         cur.execute("select count(*) from insertlog;")
         if cur.fetchone()[0] == 0:
             query = cur.mogrify(
                 f"insert into InsertLog (year, inserted_rows_n, insertion_time) values {', '.join(['%s'] * len(extract_data))}",
                 [(info[0], 0, 0) for info in extract_data])
             cur.execute(query)
-            write_to_file(migration1_name, query.decode())
-
 
 @transaction
 def populate_examinations(conn):
@@ -231,17 +188,15 @@ def populate_examinations(conn):
                 [next(reader) for _ in range(read_rows_n)]
 
                 while True:
-                    rows = [row + [year] for row in [next(reader, None) for _ in range(rows_to_write_numb)] if
-                            row is not None]
+                    rows = [row + [str(year)] for row in [next(reader, None) for _ in range(rows_to_write_numb)] if row is not None]
                     rows_n = len(rows)
                     if rows_n > 0:
-                        rows = [tuple([f(x) for f, x in zip(formatters, row)]) for row in rows]
-
-                        query = cur.mogrify(
-                            f"INSERT INTO Examinations ({', '.join(column_names)}) VALUES {', '.join(['%s'] * rows_n)};",
-                            rows)
+                        # format each rows' values to sql-standart to perform insert, encoding each string to utf-8
+                        rows = [[f(x) for f, x in zip(formatters, row)] for row in rows]
+                        values = ", ".join(["(" + ", ".join(row) + ")" for row in rows])
+                        query = f"INSERT INTO Examinations ({', '.join(column_names)}) VALUES {values};"
                         cur.execute(query)
-                        write_to_file(migration1_name, query.decode())
+                        write_to_file(migration1_name, query)
 
                         cur.execute("select inserted_rows_n, insertion_time FROM InsertLog where year = %s;", (year,))
                         total_rows, insertion_time = cur.fetchone()
@@ -251,7 +206,6 @@ def populate_examinations(conn):
                             "UPDATE InsertLog SET inserted_rows_n = %s, insertion_time = %s WHERE year = %s;",
                             (total_rows, insertion_time, year))
                         cur.execute(query)
-                        write_to_file(migration1_name, query.decode())
                         conn.commit()
 
                         start_time = time.time()
@@ -276,9 +230,8 @@ if __name__ == "__main__":
     print('Table is prepared')
     populate_examinations()
     print("Table examinations populated")
-    # write_time()
-    # write_query()
-    # print('App from lab 1 finished to work')
+    write_time()
+    print('App from lab 1 finished to work')
     write_to_file(migration2_name, q_create_locationInfo())
     write_to_file(migration3_name, create_index_on_locationinfo())
     write_to_file(migration4_name, q_create_institution())
@@ -290,6 +243,7 @@ if __name__ == "__main__":
     write_to_file(migration10_name, q_create_test_2())
     write_to_file(migration11_name, q_clean_unnecessary_structures())
     print("Migrations script generated")
+    print('Lab 2 for var 14 finished to work')
 
 # docker compose up app db
 # docker compose up flyway

@@ -11,13 +11,38 @@
 
 # ------------------------------
 # Лабораторна робота 2: Міграція
-        1. Створіть в директорії app директорію data та завантажте туди всі csv-файли з 2016 по 2021 роки
-        2. створіть в директорії app/flyway директорію sql 
-        3. запустіть в терміналі команду docker compose up app db
+Щоб запустити міграції з нуля (база пуста):
+        1. запустіть команду:
+        docker compose db migrate_0
+Щоб запустити міграції з вже існуючої бази (з лаб 1):
+        1. Завантажте в директорію data всі csv-файли з 2016 по 2021 роки
+        3. запустіть в терміналі команду:
+        docker compose up app db
         4. дочекайтеся завершення роботи додатку
-        5. запустіть в терміналі команду docker compose up flyway
-        6. моніторте стан бази:
-                6.1 командою docker exec -ti <db image id> sh
-                6.2 у відкритому shell контейнера бази введіть: psql -U Student -d ZNO
-                6.3 вводьте необхідні команди для моніторингу стану бази, наприклад проглянути всі таблиці: \dt
+        5. запустіть в терміналі команду:
+        docker compose up flyway
+Щоб моніторити стан бази:
+        запустіть в терміналі команду:
+        docker exec -ti db_labs-db-1 sh -c "psql -U Student -d ZNO"
+        вводьте необхідні команди для моніторингу стану бази, наприклад проглянути всі таблиці: \dt
 
+# Корисні команди (необов'язкові)
+Змінити max_wal_size для postgres:
+        1. Запустити shell-термінал контейнеру postgres:
+        docker exec -ti db_labs-db-1 sh
+        2. перейти в папку, де міститься postgresql.conf:
+        cd var/lib/postgresql/data
+        3. знайти рядок у файлі postgresql.conf, зі змінною max_wal_size:
+        grep -rnw postgresql.conf -e 'max_wal_size'
+        4. відкрити файл postgresql.conf:
+        vi postgresql.conf
+        5. почати редагування:
+        i
+        6. завершити редагування:
+        esc
+        7. закрити файл:
+        :x
+        8. зупинити контейнер postgres
+        відновити контейнер postgres
+postgresql-запит, щоб моніторити міграції:
+select version, description, installed_on, execution_time from flyway_schema_history;
