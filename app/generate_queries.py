@@ -336,7 +336,7 @@ def q_create_test_2():
 delete from Test where testname is null;
 alter table Test add column testId serial;
 
-alter table Test add constraint pk_test_student primary key (outId, testId);
+alter table Test add constraint pk_test_student primary key (testId);
 alter table Test add constraint fk_institution foreign key (instId) references Institution (instId);
 alter table Test add constraint fk_student foreign key (outId) references Student (outId);\n\n"""
     return q
