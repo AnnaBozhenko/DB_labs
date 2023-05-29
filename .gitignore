@@ -1,3 +1,5 @@
+venv
+
 # sql-files
 app/flyway/*.sql
 
