@@ -1,5 +1,5 @@
 from app import app, engine
-#from webapp.app.models import LocationInfo, Institution, Student, Test
+from webapp.app.models import LocationInfo, Institution, Student, Test
 from sqlalchemy import bindparam, insert, select
 from flask import Flask, render_template
 
