@@ -1,4 +1,29 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html>
 
-{% block content %}
-{% endblock %}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Homepage</title>
+  <link href="../static/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <a href="{{ url_for('location_info') }}">
+    <button class="btn location">LocationInfo</button>
+  </a>
+  <a href="{{ url_for('institution_info') }}">
+    <button class="btn institution">Institution</button>
+  </a>
+  <a href="{{ url_for('student_info') }}">
+    <button class="btn student">Student</button>
+  </a>
+  <a href="{{ url_for('test_info') }}">
+    <button class="btn test">Test</button>
+  </a>
+  <a href="{{ url_for('statistic_info') }}">
+    <button class="btn statistic">Statistic</button>
+  </a>
+</body>
+
+</html>

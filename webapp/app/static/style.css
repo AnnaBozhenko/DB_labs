@@ -1,0 +1,43 @@
+html {
+  height: 100%;
+  width: 100%;
+  background-color: #B9F3FC;
+}
+
+.btn {
+    border-radius: 5px;
+    background-color: #D9ACF5;
+    color: #7286D3;
+    width: 250px;
+    border: 2px solid #7286D3;
+    left: 40%;
+    position: absolute;
+    padding: 28px 84px;
+    font-size: 16px;
+    cursor: pointer;
+    display: inline-block;
+}
+.btn:hover{
+    background-color: #FFCEFE;
+    color: #7286D3;
+}
+
+
+.location {
+    top: 10%;
+}
+.institution {
+    top: 25%;
+}
+.student {
+    top: 40%;
+}
+.test {
+    top: 55%;
+}
+
+.statistic {
+    top: 70%;
+}
+
+
