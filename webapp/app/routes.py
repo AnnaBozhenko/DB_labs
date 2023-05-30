@@ -30,6 +30,10 @@ def test_info():
 def queries():
     return render_template("queries.html", title="Queries")
 
+@app.route('/statistics', methods=['GET', 'POST'])
+def statistics():
+    return render_template("statistics.html", title="Statistics")
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
