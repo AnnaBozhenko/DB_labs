@@ -1,5 +1,5 @@
 from app import app, engine
-from webapp.app.models import LocationInfo, Institution, Student, Test
+#from webapp.app.models import LocationInfo, Institution, Student, Test
 from sqlalchemy import bindparam, insert, select
 from flask import Flask, render_template
 
@@ -109,9 +109,9 @@ def make_shell_context():
 # @app.route('/test_info/', methods=['GET', 'POST'])
 # def test_info():
 #     return render_template('test.html')
-
-
-# @app.route('/queries_info', methods=['GET', 'POST'])
+#
+#
+# @app.route('/queries_info/', methods=['GET', 'POST'])
 # def queries():
 #     return render_template("queries.html", title="Queries")
 #

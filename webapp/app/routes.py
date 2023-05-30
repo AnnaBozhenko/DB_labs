@@ -2,27 +2,31 @@ from flask import render_template, url_for
 from app import app
 
 @app.route('/')
-@app.route('/index', methods=['GET', 'POST'])
-def index():
-    return render_template("index.html", title="Home")
+@app.route('/', methods=['GET', 'POST'])
+def main_page():
+    return render_template('index.html')
 
-@app.route('/location', methods=['GET', 'POST'])
-def location():
-    return render_template("location.html", title="Location")
+@app.route('/location_info/', methods=['GET', 'POST'])
+def location_info():
+    return render_template('location.html')
 
-@app.route('/student', methods=['GET', 'POST'])
-def student():
-    return render_template("student.html", title="Student")
 
-@app.route('/institution', methods=['GET', 'POST'])
-def institution():
-    return render_template("institution.html", title="Institution")
+@app.route('/institution_info/', methods=['GET', 'POST'])
+def institution_info():
+    return render_template('institution.html')
 
-@app.route('/test', methods=['GET', 'POST'])
-def test():
-    return render_template("test.html", title="Test")
 
-@app.route('/queries', methods=['GET', 'POST'])
+@app.route('/student_info/', methods=['GET', 'POST'])
+def student_info():
+    return render_template('student.html')
+
+
+@app.route('/test_info/', methods=['GET', 'POST'])
+def test_info():
+    return render_template('test.html')
+
+
+@app.route('/queries_info/', methods=['GET', 'POST'])
 def queries():
     return render_template("queries.html", title="Queries")
 
