@@ -3,7 +3,6 @@ from config import Config
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-
 app = Flask(__name__)
 app.config.from_object('config')
 app.config.from_object(Config)
