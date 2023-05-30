@@ -1,10 +1,9 @@
 from app import app, engine
-from webapp.app.models import LocationInfo, Institution, Student, Test
+#from webapp.app.models import LocationInfo, Institution, Student, Test
 from sqlalchemy import bindparam, insert, select
 from flask import Flask, render_template
 
 app = Flask(__name__)
-from app import app
 
 def insert_into_locationInfo(values):
     """values - list of dictionaries e.g [{'areaName': x, 'terName': y, 'regName': z}]"""
@@ -88,33 +87,33 @@ def insert_into_test(values):
 def make_shell_context():
     return {'LocationInfo': LocationInfo, 'Institution': Institution, 'Student': Student, 'Test': Test}
 
-@app.route('/', methods=['GET', 'POST'])
-def main_page():
-    return render_template('index.html')
+# @app.route('/', methods=['GET', 'POST'])
+# def main_page():
+#     return render_template('index.html')
+#
+# @app.route('/location_info/', methods=['GET', 'POST'])
+# def location_info():
+#     return render_template('location.html')
+#
+#
+# @app.route('/institution_info/', methods=['GET', 'POST'])
+# def institution_info():
+#     return render_template('institution.html')
+#
+#
+# @app.route('/student_info/', methods=['GET', 'POST'])
+# def student_info():
+#     return render_template('student.html')
+#
+#
+# @app.route('/test_info/', methods=['GET', 'POST'])
+# def test_info():
+#     return render_template('test.html')
 
-@app.route('/location_info/', methods=['GET', 'POST'])
-def location_info():
-    return render_template('location.html')
 
-
-@app.route('/institution_info/', methods=['GET', 'POST'])
-def institution_info():
-    return render_template('institution.html')
-
-
-@app.route('/student_info/', methods=['GET', 'POST'])
-def student_info():
-    return render_template('student.html')
-
-
-@app.route('/test_info/', methods=['GET', 'POST'])
-def test_info():
-    return render_template('test.html')
-
-
-@app.route('/statistic_info/', methods=['GET', 'POST'])
-def statistic_info():
-    return render_template('student.html')
+@app.route('/queries_info', methods=['GET', 'POST'])
+def queries():
+    return render_template("queries.html", title="Queries")
 
 
 
