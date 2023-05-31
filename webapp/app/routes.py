@@ -1,7 +1,7 @@
-from flask import render_template, url_for
+from flask import render_template
 from . import app
+from .models import get_statistics
 
-@app.route('/')
 @app.route('/', methods=['GET', 'POST'])
 def main_page():
     return render_template('index.html')
@@ -23,14 +23,12 @@ def student_info():
 
 @app.route('/test', methods=['GET', 'POST'])
 def test_info():
-    return render_template('test.html')
+    return render_template("test.html", title="Test")
 
-
-@app.route('/queries', methods=['GET', 'POST'])
-def queries():
-    return render_template("queries.html", title="Queries")
 
 @app.route('/statistics', methods=['GET', 'POST'])
 def statistics():
-    return render_template("statistics.html", title="Statistics")
-
+    headers = ("Рік", "Регіон", "Предмет", "Бал")
+    # query parameters 
+    result = get_statistics(years=[2019, 2020], regions=[], subjects=['Англійська мова'], ball_function='avg', teststatus='Зараховано')
+    return render_template('statistics.html', headers=headers, statistics_data=result)
