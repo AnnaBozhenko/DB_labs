@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body>
+  <nav class="w3-bar w3-black">
+   <a href= "{{url_for('main_page')}}" class="w3-button w3-bar-item">Home</a>
+  </nav>
+
+  <h1>This is a statistic</h1>
+  <p>This is a paragraph.</p>
+  <table id="demo">
+    <thead>
+      <tr>
+        {% for header in headers %}
+        <td> {{ header }}</td>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in statistics_data %}
+        <tr>
+        {% for col in row %}
+        <td>{{ col }}</td>
+        {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>
