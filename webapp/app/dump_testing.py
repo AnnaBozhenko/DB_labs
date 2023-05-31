@@ -10,13 +10,19 @@ db_pass = "turtle"
 db_name = "python_db"
 db_host = "localhost"
 
+
+# db_user = "postgres"
+# db_pass = "1111"
+# db_name = "test"
+# db_host = "localhost"
+
 rows_to_write_numb = 100
-extract_data = [(2016, "./data/OpenData2016.csv", "cp1251"),
-                (2017, "./data/OpenData2017.csv", "utf-8-sig"),
-                (2018, "./data/OpenData2018.csv", "utf-8-sig"),
-                (2019, "./data/Odata2019File.csv", "cp1251"),
-                (2020, "./data/Odata2020File.csv", "cp1251"),
-                (2021, "./data/Odata2021File.csv", "utf-8-sig")]
+extract_data = [(2016, "../app/data/OpenData2016.csv", "cp1251"),
+                (2017, "../app/data/OpenData2017.csv", "utf-8-sig"),
+                (2018, "../app/data/OpenData2018.csv", "utf-8-sig"),
+                (2019, "../app/data/Odata2019File.csv", "cp1251"),
+                (2020, "../app/data/Odata2020File.csv", "cp1251"),
+                (2021, "../app/data/Odata2021File.csv", "utf-8-sig")]
 
 
 # --------- FUNCTIONALITY ----------

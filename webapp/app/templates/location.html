@@ -8,8 +8,27 @@
    <a href="{{ url_for('main_page') }}" class="w3-button w3-bar-item">Home</a>
   </nav>
 
-<h1>This is a location</h1>
-<p>This is a paragraph.</p>
+	<table id="demo">
+    <thead>
+      <tr>
+        {% for column in columns %}
+        <td> {{ column }}</td>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for location in locations %}
+        <tr>
+        {% for col in location %}
+        <td>{{ col }}</td>
+        {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+
+
 
 </body>
 </html>
