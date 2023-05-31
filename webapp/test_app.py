@@ -85,9 +85,9 @@ def test_info():
     return render_template('test.html')
 
 
-@app.route('/queries_info/', methods=['GET', 'POST'])
-def queries():
-    return render_template("queries.html", title="Queries")
+@app.route('/statistics_info/', methods=['GET', 'POST'])
+def statistics():
+    return render_template("statistics.html", title="Queries")
 
 if __name__ == "__main__":
     app.run(debug=True)
