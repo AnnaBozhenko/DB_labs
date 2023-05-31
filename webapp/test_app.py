@@ -15,7 +15,7 @@ from sqlalchemy import MetaData, Table, select, create_engine
 # this variable, db, will be used for all SQLAlchemy commands
 db = SQLAlchemy()
 # create the app
-app = Flask(__name__, template_folder='app//templates')
+app = Flask(__name__, template_folder='app//templates', static_folder='app//static')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:1111@localhost/test'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
