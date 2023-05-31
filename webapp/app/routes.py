@@ -1,5 +1,5 @@
 from flask import render_template, url_for
-from webapp.app import app
+from . import app
 
 @app.route('/')
 @app.route('/', methods=['GET', 'POST'])
@@ -34,6 +34,3 @@ def queries():
 def statistics():
     return render_template("statistics.html", title="Statistics")
 
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True)

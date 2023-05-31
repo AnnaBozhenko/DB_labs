@@ -1,7 +1,12 @@
 from flask import Flask
-from config import Config
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
+
+# set up import policy to import from parent directories
+import sys
+sys.path.append('../webapp')
+from config import Config
+sys.path.remove('../webapp')
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -17,5 +22,3 @@ def db_session(func):
             session.commit()
             return func_call
     return inner
-
-from app import routes
