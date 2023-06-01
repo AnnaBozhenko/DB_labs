@@ -40,4 +40,30 @@ html {
     top: 70%;
 }
 
+.navbtn{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    font-style: italic;
+    color: #7286D3;
+}
 
+table, th, td {
+  border: 1px solid;
+}
+
+table{
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td:hover {background-color: #ccff99;}
+
+th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #4d0099;
+  color: white;
+}
