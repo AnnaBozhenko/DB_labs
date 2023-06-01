@@ -36,7 +36,6 @@ class UpdateLocation(FlaskForm):
     areaname = StringField('areaname')
     regname = StringField('regname')
     tername = StringField('tername')
-    #locationid = HiddenField()
     submit = SubmitField("Submit")
 
 def get_db_session_scope(sql_db_session):
