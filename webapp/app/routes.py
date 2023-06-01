@@ -2,7 +2,7 @@ from flask import redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, StringField, SubmitField
 from . import app
-from .models import get_statistics, insert_into_locationInfo, get_locationinfo
+from .models import get_statistics, insert_into_locationInfo, get_locationinfo, insert_data
 
 class UpdateLocation(FlaskForm):
     areaname = StringField('areaname')
@@ -37,39 +37,39 @@ def add_location():
 
 # створити роут для вставки в базу 
 def insert_test():
-    {'student_id'
-    'student_birth'
-    'student_sex'
-    'student_area'
-    'student_region'
-    'student_ter'
-    'student_regtype'
-    'class_profile'
-    'class_lang'
-    'student_inst_name'
-    'student_inst_area'
-    'student_inst_region'
-    'student_inst_ter'
-    'student_inst_type'
-    'student_inst_parent'
+    # write here maps of forms
+    values = {'student_id': student_id,
+    'student_birth': student_birth,
+    'student_sex': student_sex,
+    'student_area': student_area,
+    'student_region': student_region,
+    'student_ter': student_ter,
+    'student_regtype': student_regtype,
+    'class_profile': class_profile,
+    'class_lang': class_lang,
+    'student_inst_name': student_inst_name,
+    'student_inst_area': student_inst_area,
+    'student_inst_region': student_inst_region,
+    'student_inst_ter': student_inst_ter,
+    'student_inst_type': student_inst_type,
+    'student_inst_parent': student_inst_parent,
+    'test_name': test_name,
+    'test_inst_name': test_inst_name,
+    'test_inst_area': test_inst_area,
+    'test_inst_region': test_inst_region,
+    'test_inst_ter': test_inst_ter,
+    'test_year': test_year,
+    'adapt_scale': adapt_scale,
+    'ball12': ball12,
+    'ball100': ball100,
+    'ball': ball,
+    'subtest': subtest,
+    'dpalevel': dpalevel,
+    'test_lang': test_lang,
+    'test_status': test_status}
+    insert_data(values)
 
-    'test_name'
-    'test_inst_name'
-    'test_inst_area'
-    'test_inst_region'
-    'test_inst_ter'
-    'test_year'
-    'adapt_scale'
-    'ball12'
-    'ball100'
-    'ball'
-    'subtest'
-    'dpalevel'
-    'test_lang'
-    'test_status'}
     
-
-
 @app.route('/institution', methods=['GET', 'POST'])
 def institution_info():
     return render_template('institution.html')
