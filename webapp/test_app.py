@@ -64,7 +64,7 @@ def main_page():
 def location_info():
     columns = ("areaname", "regname", "tername", "locationID")
 
-    return render_template('location.html',columns=columns, locations=locations)
+    return render_template('location.html', columns=columns, locations=locations)
 
 
 @app.route('/add_location/', methods=['GET', 'POST'])
@@ -77,10 +77,17 @@ def add_location():
         ter = request.form.get("ter")
 
         new_location = LocationInfo.insert().values(areaname=area, regname=region, tername=ter, locationid=-1)
-        with engine.connect() as conn:
-            conn.execute(new_location)
+        print(new_location)
 
-        db.session.commit()
+        with engine.connect() as conn:
+            result = conn.execute(new_location)
+            conn.commit()
+            print(result)
+
+        # with engine.connect() as conn:
+        #     conn.execute(new_location)
+        #
+        # db.session.commit()
         return redirect(url_for('location_info'))
     return render_template('addLocation.html', form=form, action='addPlace')
 
