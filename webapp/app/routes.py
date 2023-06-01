@@ -35,40 +35,9 @@ def add_location():
     return render_template('addLocation.html', form=form, action='addPlace')
 
 
-# створити роут для вставки в базу
-    # елементи форми: 
-"""
-    classprofilename,
-    classlangname,
-    instid,
-
-    testname,
-    instid ,
-    testyear,
-    adaptscale,
-    ball12,
-    ball100,
-    ball,
-    subtest,
-    outid,
-    subtest,
-    dpalevel,
-    testlang,
-    teststatus,
-    testid
-
-    instname,
-    locationid,
-    insttype,
-    instparent,
-    instid
-
-    areaname
-    regname
-    tername
-    locationid
-    request.form.get('') """
-    'student_id'
+# створити роут для вставки в базу 
+def insert_test():
+    {'student_id'
     'student_birth'
     'student_sex'
     'student_area'
@@ -83,7 +52,6 @@ def add_location():
     'student_inst_ter'
     'student_inst_type'
     'student_inst_parent'
-    'student_inst'
 
     'test_name'
     'test_inst_name'
@@ -98,7 +66,7 @@ def add_location():
     'subtest'
     'dpalevel'
     'test_lang'
-    'test_status'
+    'test_status'}
     
 
 
