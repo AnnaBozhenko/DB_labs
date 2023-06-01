@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
-
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import MetaData, Table, select, create_engine, desc
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, StringField, SubmitField
 import os
@@ -11,9 +12,7 @@ SECRET_KEY = os.urandom(32)
 # db_name = "test"
 # db_host = "localhost"
 
-from flask_sqlalchemy import SQLAlchemy
 
-from sqlalchemy import MetaData, Table, select, create_engine
 
 
 # this variable, db, will be used for all SQLAlchemy commands
@@ -26,31 +25,27 @@ app.config['SECRET_KEY'] = SECRET_KEY
 
 # initialize the app with Flask-SQLAlchemy
 db.init_app(app)
-
 metadata_obj = MetaData()
 engine = create_engine('postgresql+psycopg2://postgres:1111@localhost/test')
 LocationInfo = Table("locationinfo", metadata_obj, autoload_with=engine, schema="public")
-query_locations = select(LocationInfo)
-with engine.connect() as conn:
-    locations = conn.execute(query_locations).all()
+
+query_locations = select(LocationInfo).order_by(desc(LocationInfo.c.locationid))
 
 class UpdateLocation(FlaskForm):
     areaname = StringField('areaname')
     regname = StringField('regname')
     tername = StringField('tername')
-    locationid = HiddenField()
     submit = SubmitField("Submit")
-
-def get_db_session_scope(sql_db_session):
-    session = sql_db_session()
-    try:
-        yield session
-        session.commit()
-    except:
-        session.rollback()
-        raise
-    finally:
-        session.close()
+# def get_db_session_scope(sql_db_session):
+#     session = sql_db_session()
+#     try:
+#         yield session
+#         session.commit()
+#     except:
+#         session.rollback()
+#         raise
+#     finally:
+#         session.close()
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -62,6 +57,10 @@ def main_page():
 
 @app.route('/location_info/', methods=['GET', 'POST'])
 def location_info():
+
+
+    with engine.connect() as conn:
+        locations = conn.execute(query_locations).all()
     columns = ("areaname", "regname", "tername", "locationID")
 
     return render_template('location.html', columns=columns, locations=locations)
@@ -76,7 +75,7 @@ def add_location():
         region = request.form.get("region")
         ter = request.form.get("ter")
 
-        new_location = LocationInfo.insert().values(areaname=area, regname=region, tername=ter, locationid=-1)
+        new_location = LocationInfo.insert().values(areaname=area, regname=region, tername=ter)
         print(new_location)
 
         with engine.connect() as conn:
