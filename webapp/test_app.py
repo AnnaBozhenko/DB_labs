@@ -1,14 +1,18 @@
-from flask import Flask, render_template
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import MetaData, Table, select, create_engine
+from flask import Flask, render_template, request, redirect, url_for
+
+from flask_wtf import FlaskForm
+from wtforms import HiddenField, StringField, SubmitField
+import os
+SECRET_KEY = os.urandom(32)
+
 
 # db_user = "postgres"
 # db_pass = "1111"
 # db_name = "test"
 # db_host = "localhost"
-from flask import Flask, render_template
+
 from flask_sqlalchemy import SQLAlchemy
-import os.path
+
 from sqlalchemy import MetaData, Table, select, create_engine
 
 
@@ -18,6 +22,7 @@ db = SQLAlchemy()
 app = Flask(__name__, template_folder='app//templates', static_folder='app//static')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:1111@localhost/test'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+app.config['SECRET_KEY'] = SECRET_KEY
 
 # initialize the app with Flask-SQLAlchemy
 db.init_app(app)
@@ -29,12 +34,23 @@ query_locations = select(LocationInfo)
 with engine.connect() as conn:
     locations = conn.execute(query_locations).all()
 
-# class Location(db.Model):
-#    __tablename__ = 'locationinfo'
-#    areaname = db.Column(db.String, nullable=False)
-#    regname = db.Column(db.String, nullable=False)
-#    tername = db.Column(db.String, nullable=False)
-#    locationid = db.Column(db.Integer, primary_key=True)
+class UpdateLocation(FlaskForm):
+    areaname = StringField('areaname')
+    regname = StringField('regname')
+    tername = StringField('tername')
+    locationid = HiddenField()
+    submit = SubmitField("Submit")
+
+def get_db_session_scope(sql_db_session):
+    session = sql_db_session()
+    try:
+        yield session
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -47,28 +63,26 @@ def main_page():
 @app.route('/location_info/', methods=['GET', 'POST'])
 def location_info():
     columns = ("areaname", "regname", "tername", "locationID")
-    # try:
-    #     db.session.commit()
-    #     locations = db.session.execute(db.select(Location).order_by(Location.locationid)).scalars()
-    #     location_text = '<ul>'
-    #     for location in locations:
-    #         print(location)
-    #         print(location.areaname)
-    #         print(location.regname)
-    #         print(location.tername)
-    #         print(location.locationid)
-    #         location_text += '<li>' + location.areaname + ', ' + location.regname + ', '+ location.tername + ', '  + str(location.locationid) + '</li>'
-    #     location_text += '</ul>'
-    #     print(location_text)
-    #     return location_text
-    # except Exception as e:
-    #     # e holds description of the error
-    #     error_text = "<p>The error:<br>" + str(e) + "</p>"
-    #     hed = '<h1>Something is broken.</h1>'
-    #     return hed + error_text
-    print(len(locations))
+
     return render_template('location.html',columns=columns, locations=locations)
 
+
+@app.route('/add_location/', methods=['GET', 'POST'])
+def add_location():
+    form = UpdateLocation(request.form)
+
+    if request.method == 'POST':
+        area = request.form.get("area")
+        region = request.form.get("region")
+        ter = request.form.get("ter")
+
+        new_location = LocationInfo.insert().values(areaname=area, regname=region, tername=ter, locationid=-1)
+        with engine.connect() as conn:
+            conn.execute(new_location)
+
+        db.session.commit()
+        return redirect(url_for('location_info'))
+    return render_template('addLocation.html', form=form, action='addPlace')
 
 @app.route('/institution_info/', methods=['GET', 'POST'])
 def institution_info():
