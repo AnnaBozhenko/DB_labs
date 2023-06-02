@@ -45,8 +45,12 @@ services:
         volumes:
             - './result_app/result_output:/result_app/result_output'
     webapp:
+        depends_on:
+            - db
         build:
             context: ./webapp
             dockerfile: Dockerfile
+        volumes:
+            - './app/data:/webapp/data'
         ports:
             - 5000:5000

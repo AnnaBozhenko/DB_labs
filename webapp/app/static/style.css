@@ -67,3 +67,23 @@ th {
   background-color: #4d0099;
   color: white;
 }
+
+form div.form-block {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: space-between;
+    width: 100%;
+    gap: 5%;
+}
+
+form  div  div {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    gap: 10%;
+}  
+
+form div.form-block input {
+    width: 100%;
+}

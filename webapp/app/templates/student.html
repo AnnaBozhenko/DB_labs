@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Page Title</title>
+<title>Student</title>
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" type="text/css" />
 </head>
 <body>
   <nav class="w3-bar w3-black">
@@ -9,7 +12,24 @@
   </nav>
 
 <h1>This is a student</h1>
-<p>This is a paragraph.</p>
+<table id="demo">
+  <thead>
+    <tr>
+      {% for column in columns %}
+      <th> {{ column }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for stud in students %}
+      <tr>
+      {% for col in stud %}
+      <td>{{ col }}</td>
+      {% endfor %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
 </body>
 </html>

@@ -1,4 +1,4 @@
-from sqlalchemy import MetaData, Table, bindparam, insert, select, func
+from sqlalchemy import MetaData, Table, delete, insert, select, func
 from . import engine
 
 #  ---- TABLES MAPPING -----
@@ -46,6 +46,35 @@ def get_locationinfo():
     with engine.connect() as conn:
         result = conn.execute(select(LocationInfo)).all()
     return result
+
+def get_institution():
+    result = None
+    with engine.connect() as conn:
+        result = conn.execute(select(Institution)).all()
+    return result
+
+def get_test():
+    result = None
+    with engine.connect() as conn:
+        result = conn.execute(select(Test)).all()
+    return result
+
+def get_student():
+    result = None
+    with engine.connect() as conn:
+        result = conn.execute(select(Student)).all()
+    return result
+
+
+def delete_location(value):
+    with engine.connect() as conn:
+        conn.execute(delete(LocationInfo).where(LocationInfo.c.locationid == value))
+        conn.commit()
+
+def delete_institution(value):
+    with engine.connect() as conn:
+        conn.execute(delete(LocationInfo).where(LocationInfo.c.locationid == value))
+        conn.commit()
     
 
 def insert_location(values):
@@ -79,6 +108,7 @@ def insert_student(values):
 
 def insert_test(values):
     with engine.connect() as conn:
+        values['subtest'] = True if values['subtest'].lower() == 'так' else False
         conn.execute(insert(Test), values)
         conn.commit()
 

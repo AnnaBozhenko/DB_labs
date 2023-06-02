@@ -6,6 +6,8 @@ app = Flask(__name__, instance_relative_config=True)
 app.config.from_object('config.Config')
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 
+from . import dump_testing
+dump_testing.dump_db() 
 
 # def db_session(func):
 #     def inner(*args, **kwargs):

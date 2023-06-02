@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add new Location</title>
+    <meta name="viewport" content="width=device-width">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<nav class="navbtn">
+    <a href="{{ url_for('main_page') }}" class="w3-button w3-bar-item">Home</a>
+</nav>
+    <form action="{{ url_for('insert_test')}}" method="POST">
+
+			{{ form.hidden_tag() }}
+        <h1>Інформація про учасника:</h1>
+        <div class="form-block">
+            <div>
+                <label for="student_id">Id :</label>
+			    <input type="text" id="student_id" name="student_id" placeholder="student_id">
+            </div>
+            <div>
+                <label for="student_birth">Рік народження :</label>
+			    <input type="number" id="student_birth" name="student_birth" placeholder="student_birth">
+            </div>
+            <div>
+                <label for="student_sex">Стать :</label>
+			    <input type="text" id="student_sex" name="student_sex" placeholder="student_sex">
+            </div>
+            <div>
+                <label for="student_area">Район :</label>
+			    <input type="text" id="student_area" name="student_area" placeholder="student_area">
+            </div>
+            <div>
+                <label for="student_region">Регіон :</label>
+			    <input type="text" id="student_region" name="student_region" placeholder="student_region">
+            </div>
+            <div>
+                <label for="student_ter">Населений пункт :</label>
+			    <input type="text" id="student_ter" name="student_ter" placeholder="student_ter">
+            </div>
+            <div>
+                <label for="student_regtype">Статус учасника :</label>
+			    <input type="text" id="student_regtype" name="student_regtype" placeholder="student_regtype">   
+            </div>
+            <div>
+                <label for="class_profile">Профіль навчання :</label>
+			    <input type="text" id="class_profile" name="class_profile" placeholder="class_profile">
+            </div>
+            <div>
+                <label for="class_lang">Мова учасника :</label>
+			    <input type="text" id="class_lang" name="class_lang" placeholder="class_lang">
+            </div>
+            <div>
+                <label for="student_inst_name">Назва навчального закладу (нз) :</label>
+			    <input type="text" id="student_inst_name" name="student_inst_name" placeholder="student_inst_name">
+            </div>
+            <div>
+                <label for="student_inst_area">Район нз :</label>
+			    <input type="text" id="student_inst_area" name="student_inst_area" placeholder="student_inst_area">
+            </div>
+            <div>
+                <label for="student_inst_region">Регіон нз :</label>
+			    <input type="text" id="student_inst_region" name="student_inst_region" placeholder="student_inst_region">
+            </div>
+            <div>
+                <label for="student_inst_ter">Населений пункт нз :</label>
+			    <input type="text" id="student_inst_ter" name="student_inst_ter" placeholder="student_inst_ter">
+            </div>
+            <div>
+                <label for="student_inst_type">Тип нз :</label>
+			    <input type="text" id="student_inst_type" name="student_inst_type" placeholder="student_inst_type">
+            </div>
+            <div>
+                <label for="student_inst_parent">Орган, якому підпорядковується заклад освіти :</label>
+			    <input type="text" id="student_inst_parent" name="student_inst_parent" placeholder="student_inst_parent">
+            </div>
+        </div>
+        <h1>Інформація про тест</h1>
+        <div class="form-block">
+            <div>
+                <label for="test_name">Назва тесту :</label>
+			    <input type="text" id="test_inst_name" name="test_inst_name" placeholder="test_inst_name">
+            </div>
+            <div>
+                <label for="test_year">Рік тесту :</label>
+			    <input type="number" id="test_year" name="test_year" placeholder="test_year">
+            </div>
+            <div>
+                <label for="test_inst_name">Назва пункт проведення тесту :</label>
+			    <input type="text" id="test_inst_name" name="test_inst_name" placeholder="test_inst_name">
+            </div>
+            <div>
+                <label for="test_inst_area">Район пункту проведення тесту :</label>
+			    <input type="text" id="test_inst_area" name="test_inst_area" placeholder="test_inst_area">
+            </div>
+            <div>
+                <label for="test_inst_region">Регіон пункту проведення тесту :</label>
+			    <input type="text" id="test_inst_region" name="test_inst_region" placeholder="test_inst_region">
+            </div>
+            <div>
+                <label for="test_inst_ter">Населений пункт пункту проведення тесту:</label>
+			    <input type="text" id="test_inst_ter" name="test_inst_ter" placeholder="test_inst_ter">
+            </div>
+            <div>
+                <label for="adapt_scale">Адаптивна шкала для студента :</label>
+			    <input type="number" id="adapt_scale" name="adapt_scale" placeholder="adapt_scale">
+            </div>
+            <div>
+                <label for="ball12">Бал 12 :</label>
+			    <input type="number" id="ball12" name="ball12" placeholder="ball12">
+            </div>
+            <div>
+                <label for="ball100">Бал 100 :</label>
+			    <input type="number" id="ball100" name="ball100" placeholder="ball100">
+            </div>
+            <div>
+                <label for="ball">Бал :</label>
+			    <input type="number" id="ball" name="ball" placeholder="ball">
+            </div>
+            <div>
+                <label for="subtest">Чи студент писав subtest(так/ні) :</label>
+			    <input type="text" id="subtest" name="subtest" placeholder="subtest">
+            </div>
+            <div>
+                <label for="dpalevel">Рівень ДПА :</label>
+			    <input type="text" id="dpalevel" name="dpalevel" placeholder="dpalevel">
+            </div>
+            <div>
+                <label for="test_lang">Мова тесту :</label>
+			    <input type="text" id="test_lang" name="test_lang" placeholder="test_lang">
+            </div>
+                <label for="test_status">Статус тесту :</label>
+			    <input type="text" id="test_status" name="test_status" placeholder="test_status">
+            </div>
+        </div>
+        <div class="form-block">
+            <button type="submit">Додати</button>
+        </div>
+	</form>
+</body>
+</html>
