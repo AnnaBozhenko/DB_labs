@@ -57,8 +57,6 @@ def main_page():
 
 @app.route('/location_info/', methods=['GET', 'POST'])
 def location_info():
-
-
     with engine.connect() as conn:
         locations = conn.execute(query_locations).all()
     columns = ("areaname", "regname", "tername", "locationID")
@@ -88,7 +86,7 @@ def add_location():
         #
         # db.session.commit()
         return redirect(url_for('location_info'))
-    return render_template('addLocation.html', form=form, action='addPlace')
+    return render_template('addNew.html', form=form, action='addPlace')
 
 @app.route('/institution_info/', methods=['GET', 'POST'])
 def institution_info():
