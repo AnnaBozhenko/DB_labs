@@ -2,7 +2,7 @@ from flask import redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SubmitField,  SelectField, SelectMultipleField
 from . import app
-from .models import get_statistics, get_locationinfo, insert_data, get_institution, get_student, get_test, delete_location
+from .models import get_statistics, get_locationinfo, insert_data, get_institution, get_student, get_test, delete_location, delete_institution, delete_student, delete_test
 
 class UpdateTables(FlaskForm):
     student_id = StringField('student_id')
@@ -72,7 +72,7 @@ def main_page():
 
 @app.route('/location_info', methods=['GET', 'POST'])
 def location_info():
-    columns = ("AreaName", "RegName", "TerName", "LocationID", "del but")
+    columns = ("AreaName", "RegName", "TerName", "LocationID", "Delete Button")
     locations = get_locationinfo()
     return render_template('location.html', columns=columns, locations=locations)
 
@@ -127,25 +127,45 @@ def insert_test():
 
 @app.route('/institution', methods=['GET', 'POST'])
 def institution_info():
-    columns = ("InstitutionID", "InstitutionName", "Parent", "InstitutionType", "LocationID")
+    columns = ("InstitutionName", "LocationID", "InstitutionType", "Parent", "InstitutionID", "Delete Button")
     institutions = get_institution()
     return render_template('institution.html', columns=columns, institutions=institutions)
 
+@app.route('/institution/delete', methods=['POST'])
+def del_institution():
+    inst_Id = request.form['inst_Id']
+    print('*****', inst_Id)
+    delete_institution(inst_Id)
+    return redirect(url_for('institution_info'))
 
 @app.route('/student', methods=['GET', 'POST'])
 def student_info():
-    columns = ("OUTID", "Birth", "SexType", "InstitutionID", "StudentType", "ProfileName", "ClassLang", "LocationID")
+    columns = ("OUTID", "Birth", "SexType", "LocationID", "StudentType", "ProfileName", "ClassLang", "InstitutionID", "Delete Button")
     students = get_student()
     return render_template('student.html', columns=columns, students=students)
+
+@app.route('/student/delete', methods=['POST'])
+def del_student():
+    outid = request.form['outid']
+    print(outid)
+    delete_student(outid)
+    return redirect(url_for('student_info'))
 
 
 @app.route('/test', methods=['GET', 'POST'])
 def test_info():
     columns = ("TestID", "TestYear", "AdaptScale", "Ball12", "Ball100", "Ball", "SubTest", "OUTID", "Subject", "DPALevel",
-               "Lang", "TestStatus", "InstitutionID")
+               "Lang", "TestStatus", "InstitutionID", "Delete Button")
     tests = get_test()
     return render_template('test.html', columns=columns, tests=tests)
 
+
+@app.route('/student/delete', methods=['POST'])
+def del_test():
+    testId = request.form['testId']
+    print(testId)
+    delete_test(testId)
+    return redirect(url_for('test_info'))
 
 @app.route('/statistics', methods=['GET', 'POST'])
 def statistics():

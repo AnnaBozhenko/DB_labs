@@ -26,6 +26,11 @@
         {% for col in institution %}
         <td>{{ col }}</td>
         {% endfor %}
+          <th>
+      <form action="{{url_for('del_institution')}}" method="POST">
+								<input type="hidden" name="inst_Id" value="{{ institution.instId }}"/>
+                                <button class="delete_btn" type="submit">Delete</button>
+							</form></th>
         </tr>
       {% endfor %}
     </tbody>

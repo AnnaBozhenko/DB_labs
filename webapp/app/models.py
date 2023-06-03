@@ -36,11 +36,29 @@ def get_institution():
         institutions = conn.execute(query_institution).all()
     return institutions
 
+def delete_institution(inst_Id):
+    with engine.connect() as conn:
+        query = Institution.delete().where(Institution.c.instId == inst_Id)
+        institutions = conn.execute(query)
+        query_institution = select(Institution).order_by(desc(Institution.c.instId))
+        institutions = conn.execute(query_institution).all()
+    return institutions
+
 def get_student():
     with engine.connect() as conn:
         query_student = select(Student)
         students = conn.execute(query_student).all()
     return students
+
+
+def delete_student(out_id):
+    with engine.connect() as conn:
+        query = Student.delete().where(Student.c.outid == out_id)
+        students = conn.execute(query)
+        query_student = select(Student)
+        students = conn.execute(query_student).all()
+    return students
+
 
 def get_test():
     with engine.connect() as conn:
@@ -48,6 +66,14 @@ def get_test():
         tests = conn.execute(query_test).all()
     return tests
 
+
+def delete_test(test_Id):
+    with engine.connect() as conn:
+        query = Test.delete().where(Test.c.testId == test_Id)
+        tests = conn.execute(query)
+        query_test = select(Test).order_by(desc(Test.c.testId))
+        tests = conn.execute(query_test).all()
+    return tests
 def get_statistics(years, regions, subjects, ball_function, teststatus):
     """give statistics on query with given years, regin names subjects, 
     ball_function (min/max/average/plain - no function to apply), teststatus(зараховано/не зараховано)"""
@@ -100,15 +126,15 @@ def get_student():
     return result
 
 
-def delete_location(value):
-    with engine.connect() as conn:
-        conn.execute(delete(LocationInfo).where(LocationInfo.c.locationid == value))
-        conn.commit()
-
-def delete_institution(value):
-    with engine.connect() as conn:
-        conn.execute(delete(LocationInfo).where(LocationInfo.c.locationid == value))
-        conn.commit()
+# def delete_location(value):
+#     with engine.connect() as conn:
+#         conn.execute(delete(LocationInfo).where(LocationInfo.c.locationid == value))
+#         conn.commit()
+#
+# def delete_institution(value):
+#     with engine.connect() as conn:
+#         conn.execute(delete(LocationInfo).where(LocationInfo.c.locationid == value))
+#         conn.commit()
     
 
 def insert_location(values):
