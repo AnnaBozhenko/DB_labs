@@ -1,9 +1,8 @@
 from flask import redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, SubmitField,  SelectField, SelectMultipleField
+from wtforms import HiddenField, StringField, IntegerField, SubmitField,  SelectField, SelectMultipleField
 from . import app
-from .models import get_statistics, get_locationinfo, insert_data, get_institution, get_student, get_test
-
+from .models import get_statistics, insert_into_locationInfo, get_locationinfo, insert_data, get_institution, get_student, get_test
 
 class UpdateTables(FlaskForm):
     student_id = StringField('student_id')
@@ -37,12 +36,33 @@ class UpdateTables(FlaskForm):
     test_status = StringField('test_status')
     submit = SubmitField("Submit")
 
+sub =[('Українська мова і література', 'Українська мова і література'),  ('Англійська мова', 'Англійська мова'),
+      ('Французька мова', 'Французька мова'), ('Іспанська мова', 'Іспанська мова'), ('Німецька мова', 'Німецька мова'),
+      ('Математика', 'Математика'), ('Математика (завдання рівня стандарту)', 'Математика (завдання рівня стандарту)'),
+      ('Географія', 'Географія'), ('Біологія', 'Біологія'), ('Російська мова', 'Російська мова'),
+      ('Історія України', 'Історія України'), ('Фізика', 'Фізика'), ('Хімія', 'Хімія'), ('Українська мова', 'Українська мова')]
 
+reg = [("all", "Всі"), ("Вінницька область", "Вінницька область"), ("Волинська область", "Волинська область"),
+       ("Дніпропетровська область", "Дніпропетровська область"), ("Донецька область", "Донецька область"),
+       ("Житомирська область", "Житомирська область"), ("Закарпатська область", "Закарпатська область"),
+       ("Запорізька область", "Запорізька область"), ("Івано-Франківська область", "Івано-Франківська область"),
+       ("Київська область", "Київська область"), ("Кіровоградська область", "Кіровоградська область"),
+       ("Луганська область", "Луганська область"), ("Львівська область", "Львівська область"),
+       ("Миколаївська область", "Миколаївська область"), ("м.Київ", "м.Київ"),
+       ("Одеська область", "Одеська область"), ("Полтавська область", "Полтавська область"),
+       ("Рівненська область", "Рівненська область"), ("Сумська область", "Сумська область"),
+       ("Тернопільська область", "Тернопільська область"), ("Харківська область", "Харківська область"),
+       ("Херсонська область", "Херсонська область"), ("Хмельницька область", "Хмельницька область"),
+       ("Черкаська область", "Черкаська область"), ("Чернівецька область", "Чернівецька область"),
+       ("Чернігівська область", "Чернігівська область")]
+
+test_year =[(2016, '2016'), (2017, '2017'), (2018, '2018'), (2019, '2019'), (2020, '2020'), (2021, '2021')]
+ball_func = [('min', 'Min'), ('max', 'Max'), ('avg', 'Avg')]
 class Statistic(FlaskForm):
-    subjects = SelectMultipleField('subject')
-    years = SelectMultipleField('year')
-    regions = SelectMultipleField('region')
-    ball_function = SelectField('ball_function')
+    subject = SelectField('subject', choices=sub, coerce=str)
+    year = SelectMultipleField('year', choices=test_year, coerce=int)
+    region = SelectMultipleField('region', choices=reg, coerce=str)
+    ball_function = SelectField('ball_function', choices=ball_func, coerce=str)
     submit = SubmitField("Submit")
 
 @app.route('/', methods=['GET', 'POST'])
@@ -100,39 +120,42 @@ def insert_test():
 
 @app.route('/institution', methods=['GET', 'POST'])
 def institution_info():
-    columns = ("InstitutionName", "LocationID", "InstitutionType", "Parent", "InstitutionID")
+    columns = ("InstitutionID", "InstitutionName", "Parent", "InstitutionType", "LocationID")
     institutions = get_institution()
     return render_template('institution.html', columns=columns, institutions=institutions)
 
 
-@app.route('/student_info', methods=['GET', 'POST'])
+@app.route('/student', methods=['GET', 'POST'])
 def student_info():
-    columns = ("OUTID", "Birth", "SexType", "LocationID", "RegNameType", "ClassProfileName", "ClassLangName", "InstitutionID")
+    columns = ("OUTID", "Birth", "SexType", "InstitutionID", "StudentType", "ProfileName", "ClassLang", "LocationID")
     students = get_student()
     return render_template('student.html', columns=columns, students=students)
 
 
-@app.route('/test_info', methods=['GET', 'POST'])
+@app.route('/test', methods=['GET', 'POST'])
 def test_info():
-    columns = ('instid', 'testyear', 'adaptscale', 'ball12', 'ball100', 'ball', 'subtest', 'outid', 'testname', 'dpalevel', 'testlang', 'teststatus', 'testid')
+    columns = ("TestID", "TestYear", "AdaptScale", "Ball12", "Ball100", "Ball", "SubTest", "OUTID", "Subject", "DPALevel",
+               "Lang", "TestStatus", "InstitutionID")
     tests = get_test()
     return render_template('test.html', columns=columns, tests=tests)
+
 
 @app.route('/statistics', methods=['GET', 'POST'])
 def statistics():
     headers = ("Рік", "Регіон", "Предмет", "Бал")
     result = []
-    # regions = []
-    # subjects = []
-    # years = []
+    # query parameters
     form = Statistic(request.form)
     if request.method == 'POST':
-        subjects = request.form.getlist("subjects")
-        years = request.form.getlist("years")
-        regions = request.form.getlist("regions")
-        ball_function = request.form.get("ball_function", "plain")
-        if ball_function is None:
-            print("ball function is None")
-        else:
-            result = get_statistics(years=years, regions=regions, subjects=subjects, ball_function=ball_function, teststatus='Зараховано')
-    return render_template('statistics.html', headers=headers, statistics_data=result, form=form)
+        subject = request.form.getlist("subject")
+        years = request.form.getlist("year")
+        regions = request.form.getlist("region")
+        ball_function = request.form.get("ball_function")
+
+        print(subject)
+        print(years)
+        print(regions)
+        if 'all' in regions:
+            regions = []
+        result = get_statistics(years=years, regions=regions, subjects=subject, ball_function=ball_function, teststatus='Зараховано')
+    return render_template('statistics.html', form=form, headers=headers, statistics_data=result)
