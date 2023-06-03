@@ -75,11 +75,11 @@ table{
 td:hover {background-color: #ccff99;}
 
 th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: left;
-  background-color: #4d0099;
-  color: white;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4d0099;
+    color: white;
 }
 
 

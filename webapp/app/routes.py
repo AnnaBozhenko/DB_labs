@@ -1,8 +1,8 @@
 from flask import redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, StringField, IntegerField, SubmitField,  SelectField, SelectMultipleField
+from wtforms import StringField, IntegerField, SubmitField,  SelectField, SelectMultipleField
 from . import app
-from .models import get_statistics, insert_into_locationInfo, get_locationinfo, insert_data, get_institution, get_student, get_test
+from .models import get_statistics, get_locationinfo, insert_data, get_institution, get_student, get_test, delete_location
 
 class UpdateTables(FlaskForm):
     student_id = StringField('student_id')
@@ -56,7 +56,7 @@ reg = [("all", "Всі"), ("Вінницька область", "Вінниць�
        ("Черкаська область", "Черкаська область"), ("Чернівецька область", "Чернівецька область"),
        ("Чернігівська область", "Чернігівська область")]
 
-test_year =[(2016, '2016'), (2017, '2017'), (2018, '2018'), (2019, '2019'), (2020, '2020'), (2021, '2021')]
+test_year = [(2016, '2016'), (2017, '2017'), (2018, '2018'), (2019, '2019'), (2020, '2020'), (2021, '2021')]
 ball_func = [('min', 'Min'), ('max', 'Max'), ('avg', 'Avg')]
 class Statistic(FlaskForm):
     subject = SelectField('subject', choices=sub, coerce=str)
@@ -72,9 +72,16 @@ def main_page():
 
 @app.route('/location_info', methods=['GET', 'POST'])
 def location_info():
-    columns = ("AreaName", "RegName", "TerName", "LocationID")
+    columns = ("AreaName", "RegName", "TerName", "LocationID", "del but")
     locations = get_locationinfo()
     return render_template('location.html', columns=columns, locations=locations)
+
+@app.route('/location_info/delete', methods=['POST'])
+def del_location():
+    location_id = request.form['location_id']
+    print(location_id)
+    delete_location(location_id)
+    return redirect(url_for('location_info'))
 
 
 # створити роут для вставки в базу
