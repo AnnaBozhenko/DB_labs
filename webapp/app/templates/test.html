@@ -1,35 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Test</title>
-  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" type="text/css" />
+<title>Page Title</title>
 </head>
 <body>
-  <nav class="navbtn">
-   <a href="{{ url_for('main_page') }}" class="bar-item">Home</a>
+  <nav class="w3-bar w3-black">
+   <a href="{{ url_for('main_page') }}" class="w3-button w3-bar-item">Home</a>
   </nav>
-  <h1>Test</h1>
-  <table id="demo">
-    <thead>
-      <tr>
-        {% for column in columns %}
-        <th> {{ column }}</th>
-        {% endfor %}
-      </tr>
-    </thead>
-    <tbody>
-      {% for test in tests %}
-        <tr>
-        {% for col in test %}
-        <td>{{ col }}</td>
-        {% endfor %}
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
 
-
-
+<h1>This is a test</h1>
+<p>This is a paragraph.</p>
 
 </body>
 </html>

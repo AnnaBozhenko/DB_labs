@@ -9,9 +9,23 @@
 <body>
   <nav class="navbtn">
    <a href="{{ url_for('main_page') }}" class="w3-button w3-bar-item">Home</a>
+    <a href="{{ url_for('add_location') }}" class="w3-button w3-bar-item">add loc</a>
   </nav>
-  <h1>LocationInfo</h1>
-  <table id="demo">
+<!--  <form action="{{ request.path  }}"  method="POST">-->
+<!--    <label for="areaname">AreaName:</label>-->
+<!--    <input type="text" id="areaname" name="areaname" value="some are">-->
+<!--    <label for="regname">RegName:</label>-->
+<!--    <input type="text" id="regname" name="regname" value="some reg">-->
+<!--    <label for="tername">TerName:</label>-->
+<!--    <input type="text" id="tername" name="tername" value="some ter">-->
+<!--    <input type="submit" value="Add">-->
+<!-- </form>-->
+
+
+
+
+
+	<table id="demo">
     <thead>
       <tr>
         {% for column in columns %}
