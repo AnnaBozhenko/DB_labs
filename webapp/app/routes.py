@@ -49,14 +49,6 @@ def location_info():
     return render_template('location.html', columns=columns, locations=locations)
 
 
-# @app.route('/add_location', methods=['GET', 'POST'])
-# def add_new():
-#     form = UpdateTables(request.form)
-#     if request.method == 'POST':
-#         values = [{'areaname': request.form.get("area"), 'regname': request.form.get("region"), 'tername': request.form.get("ter")}]
-#         insert_into_locationInfo(values)
-#         return redirect(url_for('location_info'))
-#     return render_template('addNew.html', form=form, action='add_data')
 
 
 # створити роут для вставки в базу
