@@ -120,22 +120,22 @@ def insert_test():
 
 @app.route('/institution', methods=['GET', 'POST'])
 def institution_info():
-    columns = ("InstitutionID", "InstitutionName", "LocationID", "Parent", "InstitutionType")
+    columns = ("InstitutionID", "InstitutionName", "Parent", "InstitutionType", "LocationID")
     institutions = get_institution()
     return render_template('institution.html', columns=columns, institutions=institutions)
 
 
 @app.route('/student', methods=['GET', 'POST'])
 def student_info():
-    columns = ("OUTID", "Birth", "SexType", "InstitutionID", "RegNameType", "ClassProfileName", "LocationID")
+    columns = ("OUTID", "Birth", "SexType", "InstitutionID", "StudentType", "ProfileName", "ClassLang", "LocationID")
     students = get_student()
     return render_template('student.html', columns=columns, students=students)
 
 
 @app.route('/test', methods=['GET', 'POST'])
 def test_info():
-    columns = ("TestID", "OUTID", "Subject", "Lang", "DPALevel", "Ball12", "Ball", "Ball100", "InstitutionID",
-               "TestStatus", "TestYear")
+    columns = ("TestID", "TestYear", "AdaptScale", "Ball12", "Ball100", "Ball", "SubTest", "OUTID", "Subject", "DPALevel",
+               "Lang", "TestStatus", "InstitutionID")
     tests = get_test()
     return render_template('test.html', columns=columns, tests=tests)
 
