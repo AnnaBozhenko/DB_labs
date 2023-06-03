@@ -1,6 +1,6 @@
 from flask import redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, StringField, IntegerField, SubmitField
+from wtforms import HiddenField, StringField, IntegerField, SubmitField,  SelectField, SelectMultipleField
 from . import app
 from .models import get_statistics, insert_into_locationInfo, get_locationinfo, insert_data, get_institution, get_student, get_test
 
@@ -36,6 +36,13 @@ class UpdateTables(FlaskForm):
     test_status = StringField('test_status')
     submit = SubmitField("Submit")
 
+
+class Statistic(FlaskForm):
+    subject = SelectField('subject')
+    year = SelectMultipleField('year')
+    region = SelectField('region')
+    ball_function = SelectField('ball_function')
+    submit = SubmitField("Submit")
 
 @app.route('/', methods=['GET', 'POST'])
 def main_page():
@@ -119,6 +126,20 @@ def test_info():
 @app.route('/statistics', methods=['GET', 'POST'])
 def statistics():
     headers = ("Рік", "Регіон", "Предмет", "Бал")
-    # query parameters 
-    result = get_statistics(years=[2019, 2020], regions=[], subjects=['Англійська мова'], ball_function='avg', teststatus='Зараховано')
+    result = []
+    # query parameters
+    years = []
+    regions = []
+    subjects = []
+    form = Statistic(request.form)
+    if request.method == 'POST':
+        subject = request.form.get("subject")
+        years = form.year.data
+        region = request.form.get("region")
+        ball_function = request.form.get("ball_function")
+        regions.append(region)
+        subjects.append(subject)
+        if 'Всі' in regions:
+            regions = []
+        result = get_statistics(years=years, regions=regions, subjects=subjects, ball_function=ball_function, teststatus='Зараховано')
     return render_template('statistics.html', headers=headers, statistics_data=result)

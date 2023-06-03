@@ -36,16 +36,6 @@ class UpdateLocation(FlaskForm):
     regname = StringField('regname')
     tername = StringField('tername')
     submit = SubmitField("Submit")
-# def get_db_session_scope(sql_db_session):
-#     session = sql_db_session()
-#     try:
-#         yield session
-#         session.commit()
-#     except:
-#         session.rollback()
-#         raise
-#     finally:
-#         session.close()
 
 
 @app.route('/', methods=['GET', 'POST'])
