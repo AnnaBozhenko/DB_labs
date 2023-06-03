@@ -39,9 +39,9 @@ class UpdateTables(FlaskForm):
 
 
 class Statistic(FlaskForm):
-    subject = SelectField('subject')
-    year = SelectMultipleField('year')
-    region = SelectField('region')
+    subjects = SelectMultipleField('subject')
+    years = SelectMultipleField('year')
+    regions = SelectMultipleField('region')
     ball_function = SelectField('ball_function')
     submit = SubmitField("Submit")
 
@@ -100,25 +100,21 @@ def insert_test():
 
 @app.route('/institution', methods=['GET', 'POST'])
 def institution_info():
-    columns = ("InstitutionID", "InstitutionName", "LocationID", "Parent", "InstitutionType")
+    columns = ("InstitutionName", "LocationID", "InstitutionType", "Parent", "InstitutionID")
     institutions = get_institution()
     return render_template('institution.html', columns=columns, institutions=institutions)
 
 
 @app.route('/student_info', methods=['GET', 'POST'])
 def student_info():
-    columns = ("OUTID", "Birth", "SexType", "InstitutionID", "RegNameType", "ClassProfileName", "LocationID")
+    columns = ("OUTID", "Birth", "SexType", "LocationID", "RegNameType", "ClassProfileName", "ClassLangName", "InstitutionID")
     students = get_student()
     return render_template('student.html', columns=columns, students=students)
 
 
 @app.route('/test_info', methods=['GET', 'POST'])
 def test_info():
-    # columns = ('instid', 'testyear', 'adaptscale', 'ball12', 'ball100', 'ball', 'subtest', 'outid', 'testname', 'dpalevel', 'testlang', 'teststatus', 'testid')
-    # tests = get_test()
-    # return render_template("test.html", title="Test", columns=columns, tests=tests)
-    columns = ("TestID", "OUTID", "Subject", "Lang", "DPALevel", "Ball12", "Ball", "Ball100", "InstitutionID",
-               "TestStatus", "TestYear")
+    columns = ('instid', 'testyear', 'adaptscale', 'ball12', 'ball100', 'ball', 'subtest', 'outid', 'testname', 'dpalevel', 'testlang', 'teststatus', 'testid')
     tests = get_test()
     return render_template('test.html', columns=columns, tests=tests)
 
@@ -126,19 +122,17 @@ def test_info():
 def statistics():
     headers = ("Рік", "Регіон", "Предмет", "Бал")
     result = []
-    # query parameters
-    years = []
-    regions = []
-    subjects = []
+    # regions = []
+    # subjects = []
+    # years = []
     form = Statistic(request.form)
     if request.method == 'POST':
-        subject = request.form.get("subject")
-        years = form.year.data
-        region = request.form.get("region")
-        ball_function = request.form.get("ball_function")
-        regions.append(region)
-        subjects.append(subject)
-        if 'Всі' in regions:
-            regions = []
-        result = get_statistics(years=years, regions=regions, subjects=subjects, ball_function=ball_function, teststatus='Зараховано')
-    return render_template('statistics.html', headers=headers, statistics_data=result)
+        subjects = request.form.getlist("subjects")
+        years = request.form.getlist("years")
+        regions = request.form.getlist("regions")
+        ball_function = request.form.get("ball_function", "plain")
+        if ball_function is None:
+            print("ball function is None")
+        else:
+            result = get_statistics(years=years, regions=regions, subjects=subjects, ball_function=ball_function, teststatus='Зараховано')
+    return render_template('statistics.html', headers=headers, statistics_data=result, form=form)

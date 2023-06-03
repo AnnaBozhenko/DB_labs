@@ -10,5 +10,6 @@ COPY .flaskenv .
 COPY .env .
 COPY config.py .
 COPY run_app.py .
+ENV PYTHONUNBUFFERED=1
 
 CMD ["python", "run_app.py"]

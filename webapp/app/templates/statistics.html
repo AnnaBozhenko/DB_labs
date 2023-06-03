@@ -13,7 +13,7 @@
   <h1>Statistics</h1>
   <form action="{{ url_for('statistics')}}" method="POST">
   <label for="subject">Choose a subject:</label>
-  <select id="subject">
+  <select id="subject" multiple>
             <option value="ukr">Ukr</option>
             <option value="uml">Uml</option>
             <option value="eng">Eng</option>
@@ -38,7 +38,7 @@
             <option value="2021">2021</option>
   </select>
   <label for="region">Choose a region:</label>
-  <select id="region">
+  <select id="region" multiple>
             <option value="All">Всі</option>
             <option value="Вінницька область">Вінницька область</option>
             <option value="Волинська область">Волинська область</option>
@@ -67,13 +67,14 @@
             <option value="Чернігівська область,">Чернігівська область,</option>
   </select>
 
-      <label for="ball_function">Choose a ball_function:</label>
+  <label for="ball_function">Choose a ball_function:</label>
   <select id="ball_function">
             <option value="max">max</option>
             <option value="min">min</option>
             <option value="avg">avg</option>
-            <option value="plain">plain</option>
+            <option value="plain">звичайний</option>
   </select><br>
+
       <p>Hold down the Ctrl button to select multiple options.</p>
 
       <button class="choose_btn" type="submit">Choose</button>

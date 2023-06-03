@@ -12,8 +12,7 @@ Test = Table("test", metadata_obj, autoload_with=engine, schema="public")
 # -------------------------
 statistic_funcs = {"min": func.min(Test.c.ball100),
                    "max": func.max(Test.c.ball100),
-                   "avg": func.avg(Test.c.ball100),
-                   "plain": Test.c.ball100}
+                   "avg": func.avg(Test.c.ball100)}
 
 def insert_into_locationInfo():
     pass
