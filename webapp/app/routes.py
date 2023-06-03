@@ -79,7 +79,6 @@ def location_info():
 @app.route('/location_info/delete', methods=['POST'])
 def del_location():
     location_id = request.form['location_id']
-    print(location_id)
     delete_location(location_id)
     return redirect(url_for('location_info'))
 
@@ -129,6 +128,7 @@ def insert_test():
 def institution_info():
     columns = ("InstitutionName", "LocationID", "InstitutionType", "Parent", "InstitutionID", "Delete Button")
     institutions = get_institution()
+
     return render_template('institution.html', columns=columns, institutions=institutions)
 
 @app.route('/institution/delete', methods=['POST'])
@@ -149,18 +149,19 @@ def del_student():
     outid = request.form['outid']
     print(outid)
     delete_student(outid)
+
     return redirect(url_for('student_info'))
 
 
 @app.route('/test', methods=['GET', 'POST'])
 def test_info():
-    columns = ("TestID", "TestYear", "AdaptScale", "Ball12", "Ball100", "Ball", "SubTest", "OUTID", "Subject", "DPALevel",
-               "Lang", "TestStatus", "InstitutionID", "Delete Button")
+    columns = ("InstitutionID", "TestYear", "AdaptScale", "Ball12", "Ball100", "Ball", "SubTest", "OUTID", "Subject", "DPALevel",
+               "Lang", "TestStatus", "TestID", "Delete Button")
     tests = get_test()
     return render_template('test.html', columns=columns, tests=tests)
 
 
-@app.route('/student/delete', methods=['POST'])
+@app.route('/test/delete', methods=['POST'])
 def del_test():
     testId = request.form['testId']
     print(testId)
