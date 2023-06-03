@@ -1,4 +1,4 @@
-from sqlalchemy import MetaData, Table, insert, select, func, delete, desc
+from sqlalchemy import MetaData, Table, insert, select, func, delete, desc, ForeignKey
 
 from . import engine
 
@@ -23,6 +23,13 @@ def get_locationinfo():
         locations = conn.execute(query_locations).all()
     return locations
 
+def delete_location(location_id):
+    with engine.connect() as conn:
+        query = LocationInfo.delete().where(LocationInfo.c.locationid == location_id)
+        locations = conn.execute(query)
+        query_locations = select(LocationInfo).order_by(desc(LocationInfo.c.locationid))
+        locations = conn.execute(query_locations).all()
+    return locations
 def get_institution():
     with engine.connect() as conn:
         query_institution = select(Institution).order_by(desc(Institution.c.instId))
