@@ -1,91 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Statistics</title>
-  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" type="text/css" />
+<title>Page Title</title>
 </head>
 <body>
   <nav class="w3-bar w3-black">
-   <a href= "{{url_for('main_page')}}" class="bar-item">Home</a>
+   <a href= "{{url_for('main_page')}}" class="w3-button w3-bar-item">Home</a>
   </nav>
-  <h1>Statistics</h1>
-  <form action="{{ url_for('statistics')}}" method="POST">
-  <label for="subject">Choose a subject:</label>
-  <select id="subject">
-            <option value="ukr">Ukr</option>
-            <option value="uml">Uml</option>
-            <option value="eng">Eng</option>
-            <option value="fr">Fr</option>
-            <option value="sp">Sp</option>
-            <option value="deu">Deu</option>
-            <option value="mathst">MathSt</option>
-            <option value="geo">Geo</option>
-            <option value="bio">Bio</option>
-            <option value="rus">Rus</option>
-            <option value="hist">Hist</option>
-            <option value="phys">Phys</option>
-            <option value="chem">Chem</option>
-  </select>
-  <label for="year">Choose a year:</label>
-  <select id="year" multiple>
-            <option value="2016">2016</option>
-            <option value="2017">2017</option>
-            <option value="2018">2018</option>
-            <option value="2019">2019</option>
-            <option value="2020">2020</option>
-            <option value="2021">2021</option>
-  </select>
-  <label for="region">Choose a region:</label>
-  <select id="region">
-            <option value="All">Всі</option>
-            <option value="Вінницька область">Вінницька область</option>
-            <option value="Волинська область">Волинська область</option>
-            <option value="Дніпропетровська область">Дніпропетровська область</option>
-            <option value="Донецька область">Донецька область</option>
-            <option value="Житомирська область">Житомирська область</option>
-            <option value="Закарпатська область">Закарпатська область</option>
-            <option value="Запорізька область">Запорізька область</option>
-            <option value="Івано-Франківська область">Івано-Франківська область</option>
-            <option value="Київська область">Київська область</option>
-            <option value="Кіровоградська область">Rus</option>
-            <option value="Луганська область">Луганська область</option>
-            <option value="Львівська область">Львівська область</option>
-            <option value="Миколаївська область">Миколаївська область</option>
-            <option value="м.Київ">м.Київ</option>
-            <option value="Одеська область">Одеська область</option>
-            <option value="Полтавська область">Полтавська область</option>
-            <option value="Рівненська область">Рівненська область</option>
-            <option value="Сумська область">Сумська область</option>
-            <option value="Тернопільська область">Тернопільська область</option>
-            <option value="Харківська область">Харківська область</option>
-            <option value="Херсонська область">Херсонська область</option>
-            <option value="Хмельницька область">Хмельницька область</option>
-            <option value="Черкаська область">Черкаська область</option>
-            <option value="Чернівецька область">Чернівецька область</option>
-            <option value="Чернігівська область,">Чернігівська область,</option>
-  </select>
 
-      <label for="ball_function">Choose a ball_function:</label>
-  <select id="ball_function">
-            <option value="max">max</option>
-            <option value="min">min</option>
-            <option value="avg">avg</option>
-            <option value="plain">plain</option>
-  </select><br>
-      <p>Hold down the Ctrl button to select multiple options.</p>
-
-      <button class="choose_btn" type="submit">Choose</button>
-  </form>
-
-<!--  <div id="my_div" style = "display:none;">-->
-<!--    <form>-->
-<!--        -->
-<!--        <select id="select2" class="chosen_class" data-placeholder="Select here" multiple>-->
-<!--        </select>-->
-<!--    </form>-->
-
-
-</div>
+  <h1>This is a statistic</h1>
+  <p>This is a paragraph.</p>
   <table id="demo">
     <thead>
       <tr>
