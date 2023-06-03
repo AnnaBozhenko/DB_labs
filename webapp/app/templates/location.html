@@ -8,7 +8,7 @@
 </head>
 <body>
   <nav class="navbtn">
-   <a href="{{ url_for('main_page') }}" class="w3-button w3-bar-item">Home</a>
+   <a href="{{ url_for('main_page') }}" class="bar-item">Home</a>
   </nav>
   <h1>LocationInfo</h1>
   <table id="demo">
@@ -16,16 +16,32 @@
       <tr>
         {% for column in columns %}
         <th> {{ column }}</th>
+
         {% endfor %}
       </tr>
     </thead>
     <tbody>
       {% for location in locations %}
+
+
+
+
+
         <tr>
         {% for col in location %}
+
         <td>{{ col }}</td>
+
+
         {% endfor %}
+           <th>
+      <form action="{{url_for('del_location')}}" method="POST">
+								<input type="hidden" name="location_id" value="{{ location.locationid }}"/>
+                                <button class="delete_btn" type="submit">Delete</button>
+							</form></th>
+
         </tr>
+
       {% endfor %}
     </tbody>
   </table>
