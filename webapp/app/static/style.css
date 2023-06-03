@@ -4,7 +4,19 @@ html {
   background-color: #B9F3FC;
 }
 
+/*.btn button {*/
+/*  background-color: #04AA6D; !* Green background *!*/
+/*  border: 1px solid green; !* Green border *!*/
+/*  color: white; !* White text *!*/
+/*  padding: 10px 24px; !* Some padding *!*/
+/*  cursor: pointer; !* Pointer/hand icon *!*/
+/*  width: 50%; !* Set a width if needed *!*/
+/*  display: block; !* Make the buttons appear below each other *!*/
+/*}*/
+
 .btn {
+    /*display: block;*/
+
     border-radius: 5px;
     background-color: #D9ACF5;
     color: #7286D3;
@@ -15,7 +27,7 @@ html {
     padding: 28px 84px;
     font-size: 16px;
     cursor: pointer;
-    display: inline-block;
+
 }
 .btn:hover{
     background-color: #FFCEFE;
@@ -24,20 +36,22 @@ html {
 
 
 .location {
-    top: 10%;
+    top: 8%;
 }
 .institution {
-    top: 25%;
+    top: 23%;
 }
 .student {
-    top: 40%;
+    top: 38%;
 }
 .test {
-    top: 55%;
+    top: 53%;
 }
-
 .queries {
-    top: 70%;
+    top: 68%;
+}
+.add_new{
+    top: 83%;
 }
 
 .navbtn{
@@ -68,7 +82,8 @@ th {
   color: white;
 }
 
-form div.form-block {
+
+/* form div.form-block {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -86,4 +101,28 @@ form  div  div {
 
 form div.form-block input {
     width: 100%;
+} */
+
+* {
+    box-sizing: border-box;
+
+    font-size: 20px;
+}
+.column {
+  float: left ;
+  width: 40%;
+  padding: 10px;
+  /*height: 300px;*/
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+.add_btn{
+    position: relative;
+    left: 45%;
+    top: 140px;
 }
