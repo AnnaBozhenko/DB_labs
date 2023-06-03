@@ -1,4 +1,5 @@
-from sqlalchemy import MetaData, Table, delete, insert, select, func
+from sqlalchemy import MetaData, Table, insert, select, func, delete, desc
+
 from . import engine
 
 #  ---- TABLES MAPPING -----
@@ -13,6 +14,33 @@ statistic_funcs = {"min": func.min(Test.c.ball100),
                    "max": func.max(Test.c.ball100),
                    "avg": func.avg(Test.c.ball100),
                    "plain": Test.c.ball100}
+
+def insert_into_locationInfo():
+    pass
+
+def get_locationinfo():
+    with engine.connect() as conn:
+        query_locations = select(LocationInfo).order_by(desc(LocationInfo.c.locationid))
+        locations = conn.execute(query_locations).all()
+    return locations
+
+def get_institution():
+    with engine.connect() as conn:
+        query_institution = select(Institution).order_by(desc(Institution.c.instId))
+        institutions = conn.execute(query_institution).all()
+    return institutions
+
+def get_student():
+    with engine.connect() as conn:
+        query_student = select(Student)
+        students = conn.execute(query_student).all()
+    return students
+
+def get_test():
+    with engine.connect() as conn:
+        query_test = select(Test).order_by(desc(Test.c.testId))
+        tests = conn.execute(query_test).all()
+    return tests
 
 def get_statistics(years, regions, subjects, ball_function, teststatus):
     """give statistics on query with given years, regin names subjects, 
@@ -222,4 +250,3 @@ def insert_data(values):
             'testlang': values['test_lang'],
             'teststatus': values['test_status']}
     insert_test(test)
-

@@ -7,30 +7,27 @@
   <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" type="text/css" />
 </head>
 <body>
-  <nav class="w3-bar w3-black">
-   <a href="{{ url_for('main_page') }}" class="w3-button w3-bar-item">Home</a>
-   <a href="{{ url_for('insert_test') }}" class="w3-button w3-bar-item">add test</a>
+  <nav class="navbtn">
+   <a href="{{ url_for('main_page') }}" class="bar-item">Home</a>
   </nav>
-
-<h1>This is a test</h1>
-<table id="demo">
-  <thead>
-    <tr>
-      {% for column in columns %}
-      <th> {{ column }}</th>
-      {% endfor %}
-    </tr>
-  </thead>
-  <tbody>
-    {% for test in tests %}
+  <h1>Test</h1>
+  <table id="demo">
+    <thead>
       <tr>
-      {% for col in test %}
-      <td>{{ col }}</td>
-      {% endfor %}
+        {% for column in columns %}
+        <th> {{ column }}</th>
+        {% endfor %}
       </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
+    </thead>
+    <tbody>
+      {% for test in tests %}
+        <tr>
+        {% for col in test %}
+        <td>{{ col }}</td>
+        {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </body>
 </html>
