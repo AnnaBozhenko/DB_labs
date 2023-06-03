@@ -41,7 +41,7 @@ inner join LocationInfo on
     LocationInfo.terName = examinations.{test}pttername)""" for test in TESTS]) + ";\n"
     q += """
 alter table Institution add column instId serial primary key;
-alter table Institution add constraint fk_location foreign key (locationId) references LocationInfo (locationId);\n"""
+alter table Institution add constraint fk_location foreign key (locationId) references LocationInfo (locationId) on delete cascade;\n"""
     return q
 
 def q_create_student_1():
@@ -103,8 +103,8 @@ alter table Student drop column eoregname;
 alter table Student drop column eotername;
 
 alter table Student add constraint pk_student primary key (outId);
-alter table Student add constraint fk_location foreign key (locationId) references LocationInfo (locationId);
-alter table Student add constraint fk_institution foreign key (instId) references Institution (instId);\n"""
+alter table Student add constraint fk_location foreign key (locationId) references LocationInfo (locationId) on delete cascade;
+alter table Student add constraint fk_institution foreign key (instId) references Institution (instId) on delete cascade;\n"""
     return q
 
 def q_create_test_1():
@@ -337,8 +337,8 @@ delete from Test where testname is null;
 alter table Test add column testId serial;
 
 alter table Test add constraint pk_test_student primary key (testId);
-alter table Test add constraint fk_institution foreign key (instId) references Institution (instId);
-alter table Test add constraint fk_student foreign key (outId) references Student (outId);\n\n"""
+alter table Test add constraint fk_institution foreign key (instId) references Institution (instId) on delete cascade;
+alter table Test add constraint fk_student foreign key (outId) references Student (outId) on delete cascade;\n\n"""
     return q
 
 def q_clean_unnecessary_structures():

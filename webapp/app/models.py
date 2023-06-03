@@ -26,23 +26,21 @@ def get_locationinfo():
 def delete_location(location_id):
     with engine.connect() as conn:
         query = LocationInfo.delete().where(LocationInfo.c.locationid == location_id)
-        locations = conn.execute(query)
-        query_locations = select(LocationInfo).order_by(desc(LocationInfo.c.locationid))
-        locations = conn.execute(query_locations).all()
-    return locations
+        conn.execute(query)
+        conn.commit()
+
+
 def get_institution():
     with engine.connect() as conn:
-        query_institution = select(Institution).order_by(desc(Institution.c.instId))
+        query_institution = select(Institution).order_by(desc(Institution.c.instid))
         institutions = conn.execute(query_institution).all()
     return institutions
 
 def delete_institution(inst_Id):
     with engine.connect() as conn:
-        query = Institution.delete().where(Institution.c.instId == inst_Id)
-        institutions = conn.execute(query)
-        query_institution = select(Institution).order_by(desc(Institution.c.instId))
-        institutions = conn.execute(query_institution).all()
-    return institutions
+        query = Institution.delete().where(Institution.c.instid == inst_Id)
+        conn.execute(query)
+        conn.commit()
 
 def get_student():
     with engine.connect() as conn:
@@ -54,26 +52,23 @@ def get_student():
 def delete_student(out_id):
     with engine.connect() as conn:
         query = Student.delete().where(Student.c.outid == out_id)
-        students = conn.execute(query)
-        query_student = select(Student)
-        students = conn.execute(query_student).all()
-    return students
+        conn.execute(query)
+        conn.commit()
 
 
 def get_test():
     with engine.connect() as conn:
-        query_test = select(Test).order_by(desc(Test.c.testId))
+        query_test = select(Test).order_by(desc(Test.c.testid))
         tests = conn.execute(query_test).all()
     return tests
 
 
 def delete_test(test_Id):
     with engine.connect() as conn:
-        query = Test.delete().where(Test.c.testId == test_Id)
-        tests = conn.execute(query)
-        query_test = select(Test).order_by(desc(Test.c.testId))
-        tests = conn.execute(query_test).all()
-    return tests
+        query = Test.delete().where(Test.c.testid == test_Id)
+        conn.execute(query)
+        conn.commit()
+
 def get_statistics(years, regions, subjects, ball_function, teststatus):
     """give statistics on query with given years, regin names subjects, 
     ball_function (min/max/average/plain - no function to apply), teststatus(зараховано/не зараховано)"""
