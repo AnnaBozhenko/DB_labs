@@ -31,23 +31,11 @@ LocationInfo = Table("locationinfo", metadata_obj, autoload_with=engine, schema=
 
 query_locations = select(LocationInfo).order_by(desc(LocationInfo.c.locationid))
 
-
 class UpdateLocation(FlaskForm):
     areaname = StringField('areaname')
     regname = StringField('regname')
     tername = StringField('tername')
     submit = SubmitField("Submit")
-
-def get_db_session_scope(sql_db_session):
-    session = sql_db_session()
-    try:
-        yield session
-        session.commit()
-    except:
-        session.rollback()
-        raise
-    finally:
-        session.close()
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -59,8 +47,6 @@ def main_page():
 
 @app.route('/location_info/', methods=['GET', 'POST'])
 def location_info():
-
-
     with engine.connect() as conn:
         locations = conn.execute(query_locations).all()
     columns = ("areaname", "regname", "tername", "locationID")
@@ -90,7 +76,7 @@ def add_location():
         #
         # db.session.commit()
         return redirect(url_for('location_info'))
-    return render_template('addLocation.html', form=form, action='addPlace')
+    return render_template('addNew.html', form=form, action='addPlace')
 
 @app.route('/institution_info/', methods=['GET', 'POST'])
 def institution_info():
