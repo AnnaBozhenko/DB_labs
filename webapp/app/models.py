@@ -96,29 +96,29 @@ def get_statistics(years, regions, subjects, ball_function, teststatus):
         result = conn.execute(query).all()
     return result
 
-def get_locationinfo():
-    result = None
-    with engine.connect() as conn:
-        result = conn.execute(select(LocationInfo)).all()
-    return result
-
-def get_institution():
-    result = None
-    with engine.connect() as conn:
-        result = conn.execute(select(Institution)).all()
-    return result
-
-def get_test():
-    result = None
-    with engine.connect() as conn:
-        result = conn.execute(select(Test)).all()
-    return result
-
-def get_student():
-    result = None
-    with engine.connect() as conn:
-        result = conn.execute(select(Student)).all()
-    return result
+# def get_locationinfo():
+#     result = None
+#     with engine.connect() as conn:
+#         result = conn.execute(select(LocationInfo).order_by(desc(LocationInfo.c.locationid))).all()
+#     return result
+#
+# def get_institution():
+#     result = None
+#     with engine.connect() as conn:
+#         result = conn.execute(select(Institution).order_by(desc(Institution.c.instid))).all()
+#     return result
+#
+# def get_test():
+#     result = None
+#     with engine.connect() as conn:
+#         result = conn.execute(select(Test)).all()
+#     return result
+#
+# def get_student():
+#     result = None
+#     with engine.connect() as conn:
+#         result = conn.execute(select(Student)).all()
+#     return result
 
 
 # def delete_location(value):

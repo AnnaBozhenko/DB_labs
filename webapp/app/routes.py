@@ -155,8 +155,8 @@ def del_student():
 
 @app.route('/test', methods=['GET', 'POST'])
 def test_info():
-    columns = ("TestID", "TestYear", "AdaptScale", "Ball12", "Ball100", "Ball", "SubTest", "OUTID", "Subject", "DPALevel",
-               "Lang", "TestStatus", "InstitutionID", "Delete Button")
+    columns = ("InstitutionID", "TestYear", "AdaptScale", "Ball12", "Ball100", "Ball", "SubTest", "OUTID", "Subject", "DPALevel",
+               "Lang", "TestStatus", "TestID", "Delete Button")
     tests = get_test()
     return render_template('test.html', columns=columns, tests=tests)
 
