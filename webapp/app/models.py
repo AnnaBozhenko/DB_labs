@@ -78,6 +78,7 @@ def delete_test(test_Id):
         conn.execute(query)
         conn.commit()
 
+
 def get_statistics(years, regions, subjects, ball_function, teststatus):
     """give statistics on query with given years, regin names subjects, 
     ball_function (min/max/average/plain - no function to apply), teststatus(зараховано/не зараховано)"""
@@ -93,6 +94,20 @@ def get_statistics(years, regions, subjects, ball_function, teststatus):
     if teststatus:
         constraints.append(Test.c.teststatus == teststatus)
     query = None
+    result = []
+    for i in range(len(regions)):
+        for j in range(len(years)):
+            cacheKey = f"{regions[i]}_{subjects[0]}_{years[j]}_{ball_function}"
+            ball100 = redisClient.get(cacheKey)
+            if ball100 is not None:
+                result.append((years[i], regions[i], subjects[0], ball100))
+            else:
+                break
+        return result
+
+
+
+
     if ball_function == "plain":
         query = select(Test.c.testyear, LocationInfo.c.regname, Test.c.testname, Test.c.ball100) \
                 .where(Test.c.instid == Institution.c.instid, Institution.c.locationid == LocationInfo.c.locationid) \
@@ -102,7 +117,7 @@ def get_statistics(years, regions, subjects, ball_function, teststatus):
                 .where(Test.c.instid == Institution.c.instid, Institution.c.locationid == LocationInfo.c.locationid) \
                 .where(*constraints) \
                 .group_by(LocationInfo.c.regname, Test.c.testname, Test.c.testyear)
-    result = None
+
 
 
 
@@ -110,12 +125,14 @@ def get_statistics(years, regions, subjects, ball_function, teststatus):
         result = conn.execute(query).all()
         print(regions)
         # print(result)
+        c = 0
         for i in range(len(regions)):
             for j in range(len(years)):
-                cacheKey = f"{regions[i]}_{subjects[0]}_{years[j]}"
+                cacheKey = f"{regions[i]}_{subjects[0]}_{years[j]}_{ball_function}"
                 print(cacheKey)
-                redisClient.set(cacheKey, float(result[i+j][3]))
+                redisClient.set(cacheKey, float(result[c][3]))
                 redisClient.expire(cacheKey, CACHELIFETIME)
+                c += 1
         # for res in result:
         #     statisticsResults.append(region)
         #     # Caching data
