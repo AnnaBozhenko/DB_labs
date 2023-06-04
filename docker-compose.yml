@@ -54,3 +54,5 @@ services:
             - './app/data:/webapp/data'
         ports:
             - 5000:5000
+    redis:
+        image: redis
