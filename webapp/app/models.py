@@ -1,14 +1,24 @@
 from sqlalchemy import MetaData, Table, insert, select, func, delete, desc, ForeignKey
 import redis
-
+from time import perf_counter
+import functools
 from . import engine
+from hashlib import sha224
 
+def timer(func):
+    @functools.wraps(func)
+    def inner(*args, **kwargs):
+        start_time = perf_counter()
+        result = func(*args, **kwargs)
+        print(f"Finished {func.__name__!r} in {(perf_counter() - start_time):.4f} seconds")
+        return result
+    return inner
 
 
 # redisClient = redis.Redis(host="127.0.0.1",port=6379)
 redis_url = 'redis://redis:6379/0'
 redisClient = redis.from_url(redis_url)
-CACHELIFETIME = 100
+CACHELIFETIME = 300
 
 
 #  ---- TABLES MAPPING -----
@@ -78,104 +88,108 @@ def delete_test(test_Id):
         conn.execute(query)
         conn.commit()
 
-
+@timer
 def get_statistics(years, regions, subjects, ball_function, teststatus):
     """give statistics on query with given years, regin names subjects, 
     ball_function (min/max/average/plain - no function to apply), teststatus(зараховано/не зараховано)"""
-    constraints = []
-    # query_results = []
-    # data = []
-    if years:
-        constraints.append(Test.c.testyear.in_(years))
-    if regions:
-        constraints.append(LocationInfo.c.regname.in_(regions))
-    if subjects:
-        constraints.append(Test.c.testname.in_(subjects))
-    if teststatus:
-        constraints.append(Test.c.teststatus == teststatus)
-    query = None
-    result = []
-    for i in range(len(regions)):
-        for j in range(len(years)):
-            cacheKey = f"{regions[i]}_{subjects[0]}_{years[j]}_{ball_function}"
-            ball100 = redisClient.get(cacheKey)
-            if ball100 is not None:
-                result.append((years[i], regions[i], subjects[0], ball100))
-            else:
-                break
-        return result
-
-
-
-
+    # case for all balls
     if ball_function == "plain":
+        constraints = []
+        if years:
+            constraints.append(Test.c.testyear.in_(years))
+        if regions:
+            constraints.append(LocationInfo.c.regname.in_(regions))
+        if subjects:
+            constraints.append(Test.c.testname.in_(subjects))
+        if teststatus:
+            constraints.append(Test.c.teststatus == teststatus)
         query = select(Test.c.testyear, LocationInfo.c.regname, Test.c.testname, Test.c.ball100) \
                 .where(Test.c.instid == Institution.c.instid, Institution.c.locationid == LocationInfo.c.locationid) \
                 .where(*constraints)
-    else:
-        query = select(Test.c.testyear, LocationInfo.c.regname, Test.c.testname, statistic_funcs[ball_function]) \
-                .where(Test.c.instid == Institution.c.instid, Institution.c.locationid == LocationInfo.c.locationid) \
-                .where(*constraints) \
-                .group_by(LocationInfo.c.regname, Test.c.testname, Test.c.testyear)
+        with engine.connect() as conn:
+            return conn.execute(query).all()
+    # case for balls agerage, min, max 
+    result = []
+    uncached_combinations = []
+    for year in years:
+        for region in regions:
+            key = f"{year}_{region}_{subjects[0]}_{ball_function}"
+            # key = sha224(key.encode()).hexdigest()
+            ball = redisClient.get(key)
+            if ball is not None:
+                result.append((year, region, subjects[0], float(ball)))
+            else:
+                uncached_combinations.append((year, region))
+
+    if result:
+        print("cache retrieved")
+    if uncached_combinations:
+        with engine.connect() as conn:
+            for constraint in uncached_combinations:
+                query = select(Test.c.testyear, LocationInfo.c.regname, Test.c.testname, func.round(statistic_funcs[ball_function], 2)) \
+                        .where(Test.c.instid == Institution.c.instid, Institution.c.locationid == LocationInfo.c.locationid) \
+                        .where(Test.c.testyear == constraint[0], 
+                               LocationInfo.c.regname == constraint[1], 
+                               Test.c.testname.in_(subjects), 
+                               Test.c.teststatus == teststatus) \
+                        .group_by(Test.c.testyear, LocationInfo.c.regname, Test.c.testname, Test.c.ball100)
+                statistics = conn.execute(query).all()
+                for s in statistics:
+                    # write to cache
+                    key = f"{s[0]}_{s[1]}_{s[2]}_{ball_function}"
+                    # key = sha224(key.encode()).hexdigest()
+                    ball = float(s[3])
+                    redisClient.set(name=key, value=ball, ex=CACHELIFETIME)
+                    result.append(s)
+    return result
+                
+                
+    
+    # for i in range(len(regions)):
+    #     for j in range(len(years)):
+    #         cacheKey = f"{regions[i]}_{subjects[0]}_{years[j]}_{ball_function}"
+    #         ball100 = redisClient.get(cacheKey)
+    #         if ball100 is not None:
+    #             result.append((years[i], regions[i], subjects[0], ball100))
+    #         else:
+    #             break
+    #     return result
 
 
 
 
-    with engine.connect() as conn:
-        result = conn.execute(query).all()
-        print(regions)
-        # print(result)
-        c = 0
-        for i in range(len(regions)):
-            for j in range(len(years)):
-                cacheKey = f"{regions[i]}_{subjects[0]}_{years[j]}_{ball_function}"
-                print(cacheKey)
-                redisClient.set(cacheKey, float(result[c][3]))
-                redisClient.expire(cacheKey, CACHELIFETIME)
-                c += 1
+    # if ball_function == "plain":
+    #     query = select(Test.c.testyear, LocationInfo.c.regname, Test.c.testname, Test.c.ball100) \
+    #             .where(Test.c.instid == Institution.c.instid, Institution.c.locationid == LocationInfo.c.locationid) \
+    #             .where(*constraints)
+    # else:
+    #     query = select(Test.c.testyear, LocationInfo.c.regname, Test.c.testname, statistic_funcs[ball_function]) \
+    #             .where(Test.c.instid == Institution.c.instid, Institution.c.locationid == LocationInfo.c.locationid) \
+    #             .where(*constraints) \
+    #             .group_by(LocationInfo.c.regname, Test.c.testname, Test.c.testyear)
+
+
+
+
+    # with engine.connect() as conn:
+    #     result = conn.execute(query).all()
+    #     print(regions)
+    #     # print(result)
+    #     c = 0
+    #     for i in range(len(regions)):
+    #         for j in range(len(years)):
+    #             cacheKey = f"{regions[i]}_{subjects[0]}_{years[j]}_{ball_function}"
+    #             print(cacheKey)
+    #             redisClient.set(cacheKey, float(result[c][3]))
+    #             redisClient.expire(cacheKey, CACHELIFETIME)
+    #             c += 1
         # for res in result:
         #     statisticsResults.append(region)
         #     # Caching data
         #     cacheKey = f"{region.regname}_{test}_{testYear}"
         #     redisClient.set(cacheKey, float(region.ball100))
         #     redisClient.expire(cacheKey, CACHELIFETIME)
-    return result
-
-# def get_locationinfo():
-#     result = None
-#     with engine.connect() as conn:
-#         result = conn.execute(select(LocationInfo).order_by(desc(LocationInfo.c.locationid))).all()
-#     return result
-#
-# def get_institution():
-#     result = None
-#     with engine.connect() as conn:
-#         result = conn.execute(select(Institution).order_by(desc(Institution.c.instid))).all()
-#     return result
-#
-# def get_test():
-#     result = None
-#     with engine.connect() as conn:
-#         result = conn.execute(select(Test)).all()
-#     return result
-#
-# def get_student():
-#     result = None
-#     with engine.connect() as conn:
-#         result = conn.execute(select(Student)).all()
-#     return result
-
-
-# def delete_location(value):
-#     with engine.connect() as conn:
-#         conn.execute(delete(LocationInfo).where(LocationInfo.c.locationid == value))
-#         conn.commit()
-#
-# def delete_institution(value):
-#     with engine.connect() as conn:
-#         conn.execute(delete(LocationInfo).where(LocationInfo.c.locationid == value))
-#         conn.commit()
-    
+    # return result
 
 def insert_location(values):
     with engine.connect() as conn:

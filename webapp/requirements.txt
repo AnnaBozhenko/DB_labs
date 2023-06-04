@@ -4,3 +4,4 @@ wtforms
 sqlalchemy
 psycopg2-binary
 python-dotenv
+redis
