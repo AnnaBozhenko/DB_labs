@@ -47,6 +47,7 @@ services:
     webapp:
         depends_on:
             - db
+            - redis
         build:
             context: ./webapp
             dockerfile: Dockerfile
