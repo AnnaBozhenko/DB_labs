@@ -1,6 +1,15 @@
 from sqlalchemy import MetaData, Table, insert, select, func, delete, desc, ForeignKey
+import redis
 
 from . import engine
+
+
+
+# redisClient = redis.Redis(host="127.0.0.1",port=6379)
+redis_url = 'redis://redis:6379/0'
+redisClient = redis.from_url(redis_url)
+CACHELIFETIME = 100
+
 
 #  ---- TABLES MAPPING -----
 metadata_obj = MetaData()
@@ -73,6 +82,8 @@ def get_statistics(years, regions, subjects, ball_function, teststatus):
     """give statistics on query with given years, regin names subjects, 
     ball_function (min/max/average/plain - no function to apply), teststatus(зараховано/не зараховано)"""
     constraints = []
+    # query_results = []
+    # data = []
     if years:
         constraints.append(Test.c.testyear.in_(years))
     if regions:
@@ -90,10 +101,27 @@ def get_statistics(years, regions, subjects, ball_function, teststatus):
         query = select(Test.c.testyear, LocationInfo.c.regname, Test.c.testname, statistic_funcs[ball_function]) \
                 .where(Test.c.instid == Institution.c.instid, Institution.c.locationid == LocationInfo.c.locationid) \
                 .where(*constraints) \
-                .group_by(Test.c.testyear, LocationInfo.c.regname, Test.c.testname)    
-    result = None        
+                .group_by(LocationInfo.c.regname, Test.c.testname, Test.c.testyear)
+    result = None
+
+
+
     with engine.connect() as conn:
         result = conn.execute(query).all()
+        print(regions)
+        # print(result)
+        for i in range(len(regions)):
+            for j in range(len(years)):
+                cacheKey = f"{regions[i]}_{subjects[0]}_{years[j]}"
+                print(cacheKey)
+                redisClient.set(cacheKey, float(result[i+j][3]))
+                redisClient.expire(cacheKey, CACHELIFETIME)
+        # for res in result:
+        #     statisticsResults.append(region)
+        #     # Caching data
+        #     cacheKey = f"{region.regname}_{test}_{testYear}"
+        #     redisClient.set(cacheKey, float(region.ball100))
+        #     redisClient.expire(cacheKey, CACHELIFETIME)
     return result
 
 # def get_locationinfo():
