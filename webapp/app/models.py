@@ -44,6 +44,13 @@ def get_locationinfo():
 
 def delete_location(location_id):
     with engine.connect() as conn:
+        # delete dependant structures
+        query = Test.delete().where(Test.c.instid == Institution.c.instid, Institution.c.locationid == LocationInfo.c.locationId, LocationInfo.c.locationid == location_id)
+        conn.execute(query)
+        query = Student.delete().where(Student.c.instid == Institution.c.instid, Institution.c.locationid == LocationInfo.c.locationId, LocationInfo.c.locationid == location_id)
+        conn.execute(query)
+        query = Institution.delete().where(LocationInfo.c.locationid == location_id)
+        conn.execute(query)
         query = LocationInfo.delete().where(LocationInfo.c.locationid == location_id)
         conn.execute(query)
         conn.commit()
@@ -57,6 +64,13 @@ def get_institution():
 
 def delete_institution(inst_Id):
     with engine.connect() as conn:
+        # delete dependant tests and students
+        query = Test.delete().where(Test.c.outid == Student.c.outid, Student.c.instid == inst_Id)
+        conn.execute(query)
+        query = Student.delete().where(Student.c.instid == inst_Id)
+        conn.execute(query)
+        query = Test.delete().where(Test.c.instid == inst_Id)
+        conn.execute(query)
         query = Institution.delete().where(Institution.c.instid == inst_Id)
         conn.execute(query)
         conn.commit()
@@ -70,6 +84,9 @@ def get_student():
 
 def delete_student(out_id):
     with engine.connect() as conn:
+        # delete dependant test
+        query = Test.delete().where(Test.c.outid == out_id)
+        conn.execute(query)
         query = Student.delete().where(Student.c.outid == out_id)
         conn.execute(query)
         conn.commit()
@@ -113,11 +130,11 @@ def get_statistics(years, regions, subjects, ball_function, teststatus):
     uncached_combinations = []
     for year in years:
         for region in regions:
-            key = f"{year}_{region}_{subjects[0]}_{ball_function}"
+            key = f"{year}_{region}_{ball_function}"
             # key = sha224(key.encode()).hexdigest()
             ball = redisClient.get(key)
             if ball is not None:
-                result.append((year, region, subjects[0], float(ball)))
+                result.append((year, region, float(ball)))
             else:
                 uncached_combinations.append((year, region))
 
@@ -126,19 +143,19 @@ def get_statistics(years, regions, subjects, ball_function, teststatus):
     if uncached_combinations:
         with engine.connect() as conn:
             for constraint in uncached_combinations:
-                query = select(Test.c.testyear, LocationInfo.c.regname, Test.c.testname, func.round(statistic_funcs[ball_function], 2)) \
+                query = select(Test.c.testyear, LocationInfo.c.regname, func.round(statistic_funcs[ball_function], 2)) \
                         .where(Test.c.instid == Institution.c.instid, Institution.c.locationid == LocationInfo.c.locationid) \
                         .where(Test.c.testyear == constraint[0], 
                                LocationInfo.c.regname == constraint[1], 
                                Test.c.testname.in_(subjects), 
                                Test.c.teststatus == teststatus) \
-                        .group_by(Test.c.testyear, LocationInfo.c.regname, Test.c.testname, Test.c.ball100)
+                        .group_by(LocationInfo.c.regname, Test.c.testyear)
                 statistics = conn.execute(query).all()
                 for s in statistics:
                     # write to cache
-                    key = f"{s[0]}_{s[1]}_{s[2]}_{ball_function}"
+                    key = f"{s[0]}_{s[1]}_{ball_function}"
                     # key = sha224(key.encode()).hexdigest()
-                    ball = float(s[3])
+                    ball = float(s[2])
                     redisClient.set(name=key, value=ball, ex=CACHELIFETIME)
                     result.append(s)
     return result

@@ -134,7 +134,7 @@ def insert_test():
 @app.route('/institution', methods=['GET', 'POST'])
 def institution_info():
     columns = ("InstitutionName", "LocationID", "InstitutionType", "Parent", "InstitutionID", "Delete Button")
-    institutions = get_institution()
+    institutions = get_institution()[:1000]
 
     return render_template('institution.html', columns=columns, institutions=institutions)
 
@@ -148,7 +148,7 @@ def del_institution():
 @app.route('/student', methods=['GET', 'POST'])
 def student_info():
     columns = ("OUTID", "Birth", "SexType", "LocationID", "StudentType", "ProfileName", "ClassLang", "InstitutionID", "Delete Button")
-    students = get_student()
+    students = get_student()[:1000]
     return render_template('student.html', columns=columns, students=students)
 
 @app.route('/student/delete', methods=['POST'])
@@ -164,7 +164,7 @@ def del_student():
 def test_info():
     columns = ("InstitutionID", "TestYear", "AdaptScale", "Ball12", "Ball100", "Ball", "SubTest", "OUTID", "Subject", "DPALevel",
                "Lang", "TestStatus", "TestID", "Delete Button")
-    tests = get_test()
+    tests = get_test()[:1000]
     return render_template('test.html', columns=columns, tests=tests)
 
 
@@ -177,7 +177,7 @@ def del_test():
 
 @app.route('/statistics', methods=['GET', 'POST'])
 def statistics():
-    headers = ("Рік", "Регіон", "Предмет", "Бал")
+    headers = ("Рік", "Регіон", "Бал")
     result = []
     # query parameters
     form = Statistic(request.form)
@@ -193,4 +193,6 @@ def statistics():
         if 'all' in regions:
             regions = reg_all
         result = get_statistics(years=years, regions=regions, subjects=subject, ball_function=ball_function, teststatus='Зараховано')
+        if len(result) > 1000:
+            result = result[:1000]
     return render_template('statistics.html', form=form, headers=headers, statistics_data=result)
