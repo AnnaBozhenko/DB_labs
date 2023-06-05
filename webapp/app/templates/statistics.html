@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Statistics</title>
-  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" type="text/css" />
+<title>Page Title</title>
 </head>
 <body>
   <nav class="w3-bar w3-black">
-   <a href= "{{url_for('main_page')}}" class="bar-item">Home</a>
+   <a href= "{{url_for('main_page')}}" class="w3-button w3-bar-item">Home</a>
   </nav>
   <h1>Statistics</h1>
   <form class="form-control" action="{{ url_for('statistics')}}" method="POST">
