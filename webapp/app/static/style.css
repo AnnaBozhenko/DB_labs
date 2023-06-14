@@ -68,27 +68,6 @@ th {
     color: white;
 }
 
-
-/* form div.form-block {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-content: space-between;
-    width: 100%;
-    gap: 5%;
-}
-
-form  div  div {
-    display: flex;
-    flex-direction: column;
-    width: 30%;
-    gap: 10%;
-}  
-
-form div.form-block input {
-    width: 100%;
-} */
-
 * {
     box-sizing: border-box;
 
@@ -112,3 +91,43 @@ form div.form-block input {
     left: 45%;
     top: 140px;
 }
+
+/* style forms for crud-operations */
+.crud-action {    
+  margin: 0 auto;
+  /* Form outline */
+  padding: 1em;
+  border: 1px solid #ccc;
+  border-radius: 1em;
+}
+.crud-action {
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  margin-left: 0;
+}
+.crud-action label {
+  margin: 5px;
+}
+.crud-action input {
+  width: 500px;
+  font: 1em sans-serif;
+  box-sizing: border-box;
+  border: 1px solid #999;
+}
+
+.crud-action div {
+  display: flex;
+  justify-content: center;
+}
+
+.crud-action button {
+  margin: 5px;
+  width: 100px;
+}
+
+.crud-action input:focus {
+  border-color: #000;
+}
+
+  

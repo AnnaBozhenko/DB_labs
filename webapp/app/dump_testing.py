@@ -10,6 +10,10 @@ db_pass = "qwerty"
 db_name = "ZNO"
 db_host = "db"
 
+# db_user = "postgres"
+# db_pass = "turtle"
+# db_name = "python_db"
+# db_host = "localhost"
 
 # db_user = "postgres"
 # db_pass = "1111"
@@ -169,10 +173,32 @@ def migrate(conn):
         cur.execute(q_clean_unnecessary_structures())
 
 
+@transaction
+def check_exists(conn):
+    res = False
+    with conn.cursor() as cur:
+        q = """SELECT EXISTS (
+    SELECT FROM 
+        pg_tables
+    WHERE 
+        schemaname = 'public' AND 
+        tablename  = 'test'
+    );"""
+        cur.execute(q)
+        res = cur.fetchone()[0]
+    return res
+
+
 def dump_db():
-    prepare_tables()
-    print('Table is prepared')
-    populate_examinations()
-    print("Table examinations populated")
-    migrate()
-    print("Migrations script generated")
+    if not check_exists():
+        prepare_tables()
+        print('Table is prepared')
+        populate_examinations()
+        print("Table examinations populated")
+        migrate()
+        print("Migrations script generated")
+    else:
+        print("tables exist already")
+
+if __name__ == "__main__":
+    dump_db()
