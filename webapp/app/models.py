@@ -279,6 +279,8 @@ def get_statistics(years, regions, subjects, ball_function, teststatus):
                                Test.c.teststatus == teststatus) \
                         .group_by(LocationInfo.c.regname, Test.c.testyear)
                 statistics = conn.execute(query).all()
+                print("result:")
+                [print(s) for s in statistics]
                 for s in statistics:
                     # write to cache
                     key = f"{s[0]}_{s[1]}_{ball_function}"
