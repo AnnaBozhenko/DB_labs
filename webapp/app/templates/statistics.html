@@ -11,7 +11,6 @@
   <h1>Statistics</h1>
   <form class="form-control" action="{{ url_for('statistics')}}" method="POST">
       {{ form.hidden_tag() }}
-      {{ form.hidden_tag() }}
       <div>
             {{ form.subject.label }}
             {{ form.subject(class="statistic_form_fields") }}

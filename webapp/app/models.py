@@ -1,9 +1,9 @@
-from sqlalchemy import MetaData, Table, insert, select, func, delete, desc, ForeignKey
+from sqlalchemy import MetaData, Table, insert, select, update, func, delete, desc, ForeignKey
 import redis
 from time import perf_counter
 import functools
 from . import engine
-from hashlib import sha224
+# from hashlib import sha224
 
 def timer(func):
     @functools.wraps(func)
@@ -32,9 +32,7 @@ Test = Table("test", metadata_obj, autoload_with=engine, schema="public")
 statistic_funcs = {"min": func.min(Test.c.ball100),
                    "max": func.max(Test.c.ball100),
                    "avg": func.avg(Test.c.ball100)}
-
-def insert_into_locationInfo():
-    pass
+    
 
 def get_locationinfo():
     with engine.connect() as conn:
@@ -42,16 +40,146 @@ def get_locationinfo():
         locations = conn.execute(query_locations).all()
     return locations
 
+def update_location(row_to_update):
+    with engine.connect() as conn:
+        location = conn.execute(select(LocationInfo).where(LocationInfo.c.locationid == row_to_update["locationid"])).first()
+        if location:
+            areaname, regname, tername, id = location
+            if row_to_update['areaname']:
+                areaname = row_to_update['areaname']
+            if row_to_update['regname']:
+                regname = row_to_update['regname']
+            if row_to_update['tername']:
+                tername = row_to_update['tername']
+            q = update(LocationInfo).where(LocationInfo.c.locationid == id).values(areaname=areaname, regname=regname, tername=tername)
+            conn.execute(q)
+            conn.commit()
+
+def update_institution(row_to_update):
+    valid_to_update = True
+    with engine.connect() as conn:
+        institution = conn.execute(select(Institution).where(Institution.c.instid == row_to_update["instid"])).first()
+        if institution:
+            instname, locationid, insttype, instparent, instid = institution
+            if row_to_update['instname']:
+                instname = row_to_update['instname']
+            if row_to_update['locationid']:
+                locationid = row_to_update['locationid']
+                if not conn.execute(select(LocationInfo).where(LocationInfo.c.locationid == locationid)).first():
+                    valid_to_update = False
+            if row_to_update['insttype']:
+                insttype = row_to_update['insttype']
+            if row_to_update['instparent']:
+                instparent = row_to_update['instparent']
+            if valid_to_update:
+                conn.execute(update(Institution) \
+                             .where(Institution.c.instid == instid) \
+                             .values(instname=instname, 
+                                     locationid = locationid,
+                                     insttype=insttype,
+                                     instparent=instparent))
+                conn.commit()
+
+
+def update_student(row_to_update):
+    valid_to_update = True
+    with engine.connect() as conn:
+        student = conn.execute(select(Student).where(Student.c.outid == row_to_update["outid"])).first()
+        if student:
+            outid, birth, sextypename, locationid, regtypename, classprofilename, classlangname, instid = student
+            if row_to_update['birth']:
+                birth = row_to_update['birth']
+            if row_to_update['sextypename']:
+                sextypename = row_to_update['sextypename']
+            if row_to_update['regtypename']:
+                regtypename = row_to_update['regtypename']
+            if row_to_update['classprofilename']:
+                classprofilename = row_to_update['classprofilename']
+            if row_to_update['classlangname']:
+                classlangname = row_to_update['classlangname']
+            if row_to_update['locationid']:
+                locationid = row_to_update['locationid']
+                if not conn.execute(select(LocationInfo).where(LocationInfo.c.locationid == locationid)).first():
+                    valid_to_update = False
+            if row_to_update['instid']:
+                instid = row_to_update['instid']
+                if not conn.execute(select(Institution).where(Institution.c.instid == instid)).first():
+                    valid_to_update = False
+            if valid_to_update:
+                conn.execute(update(Student) \
+                             .where(Student.c.outid == outid) \
+                             .values(birth=birth,
+                                     sextypename=sextypename,
+                                     locationid=locationid,
+                                     regtypename=regtypename,
+                                     classprofilename=classprofilename,
+                                     classlangname=classlangname,
+                                     instid=instid))
+                conn.commit()
+
+
+def update_test(row_to_update):
+    valid_to_update = True
+    with engine.connect() as conn:
+        test = conn.execute(select(Test).where(Test.c.testid == row_to_update["testid"])).first()
+        if test:
+            instid, testyear, adaptscale, ball12, ball100, ball, subtest, outid, testname, dpalevel, testlang, teststatus, testid = test
+            if row_to_update['testyear']:
+                testyear = row_to_update['testyear']
+            if row_to_update['adaptscale']:
+                adaptscale = row_to_update['adaptscale']
+            if row_to_update['ball12']:
+                ball12 = row_to_update['ball12']
+            if row_to_update['ball100']:
+                ball100 = row_to_update['ball100']
+            if row_to_update['ball']:
+                ball = row_to_update['ball']
+            if row_to_update['subtest']:
+                subtest = row_to_update['subtest']
+            if row_to_update['testname']:
+                testname = row_to_update['testname']
+            if row_to_update['dpalevel']:
+                dpalevel = row_to_update['dpalevel']
+            if row_to_update['testlang']:
+                testlang = row_to_update['testlang']
+            if row_to_update['teststatus']:
+                teststatus = row_to_update['teststatus']
+            if row_to_update['outid']:
+                outid = row_to_update['outid']
+                if not conn.execute(select(Student).where(Student.c.outid == outid)).first():
+                    valid_to_update = False
+            if row_to_update['instid']:
+                instid = row_to_update['instid']
+                if not conn.execute(select(Institution).where(Institution.c.instid == instid)).first():
+                    valid_to_update = False
+            if valid_to_update:
+                conn.execute(update(Test) \
+                             .where(Test.c.testid == testid) \
+                             .values(instid=instid, 
+                                     testyear=testyear, 
+                                     adaptscale=adaptscale, 
+                                     ball12=ball12, 
+                                     ball100=ball100, 
+                                     ball=ball, 
+                                     subtest=subtest, 
+                                     outid=outid, 
+                                     testname=testname, 
+                                     dpalevel=dpalevel, 
+                                     testlang=testlang, 
+                                     teststatus=teststatus))
+                conn.commit()
+
+            
 def delete_location(location_id):
     with engine.connect() as conn:
         # delete dependant structures
-        query = Test.delete().where(Test.c.instid == Institution.c.instid, Institution.c.locationid == LocationInfo.c.locationId, LocationInfo.c.locationid == location_id)
+        query = delete(Test).where(Test.c.instid == Institution.c.instid, Institution.c.locationid == LocationInfo.c.locationid, LocationInfo.c.locationid == location_id)
         conn.execute(query)
-        query = Student.delete().where(Student.c.instid == Institution.c.instid, Institution.c.locationid == LocationInfo.c.locationId, LocationInfo.c.locationid == location_id)
+        query = delete(Student).where(Student.c.instid == Institution.c.instid, Institution.c.locationid == LocationInfo.c.locationid, LocationInfo.c.locationid == location_id)
         conn.execute(query)
-        query = Institution.delete().where(LocationInfo.c.locationid == location_id)
+        query = delete(Institution).where(Institution.c.locationid == location_id)
         conn.execute(query)
-        query = LocationInfo.delete().where(LocationInfo.c.locationid == location_id)
+        query = delete(LocationInfo).where(LocationInfo.c.locationid == location_id)
         conn.execute(query)
         conn.commit()
 
@@ -65,13 +193,13 @@ def get_institution():
 def delete_institution(inst_Id):
     with engine.connect() as conn:
         # delete dependant tests and students
-        query = Test.delete().where(Test.c.outid == Student.c.outid, Student.c.instid == inst_Id)
+        query = delete(Test).where(Test.c.outid == Student.c.outid, Student.c.instid == inst_Id)
         conn.execute(query)
-        query = Student.delete().where(Student.c.instid == inst_Id)
+        query = delete(Student).where(Student.c.instid == inst_Id)
         conn.execute(query)
-        query = Test.delete().where(Test.c.instid == inst_Id)
+        query = delete(Test).where(Test.c.instid == inst_Id)
         conn.execute(query)
-        query = Institution.delete().where(Institution.c.instid == inst_Id)
+        query = delete(Institution).where(Institution.c.instid == inst_Id)
         conn.execute(query)
         conn.commit()
 
@@ -85,9 +213,9 @@ def get_student():
 def delete_student(out_id):
     with engine.connect() as conn:
         # delete dependant test
-        query = Test.delete().where(Test.c.outid == out_id)
+        query = delete(Test).where(Test.c.outid == out_id)
         conn.execute(query)
-        query = Student.delete().where(Student.c.outid == out_id)
+        query = delete(Student).where(Student.c.outid == out_id)
         conn.execute(query)
         conn.commit()
 
@@ -101,7 +229,7 @@ def get_test():
 
 def delete_test(test_Id):
     with engine.connect() as conn:
-        query = Test.delete().where(Test.c.testid == test_Id)
+        query = delete(Test).where(Test.c.testid == test_Id)
         conn.execute(query)
         conn.commit()
 
@@ -214,7 +342,7 @@ def insert_location(values):
         check_query = select(LocationInfo).where(LocationInfo.c.areaname == values['areaname'],
                                                  LocationInfo.c.regname == values['regname'],
                                                  LocationInfo.c.tername == values['tername'])
-        if not conn.execute(check_query).all():
+        if not conn.execute(check_query).first():
             conn.execute(insert(LocationInfo), values)
             conn.commit()
 
@@ -224,7 +352,7 @@ def insert_institution(values):
         # check if exists
         check_query = select(Institution).where(Institution.c.instname == values['instname'],
                                                 Institution.c.locationid == values['locationid'])
-        if not conn.execute(check_query).all():
+        if not conn.execute(check_query).first():
             conn.execute(insert(Institution), values)
             conn.commit()
 
@@ -232,14 +360,13 @@ def insert_institution(values):
 def insert_student(values):
     with engine.connect() as conn:
         check_query = select(Student).where(Student.c.outid == values['outid'])
-        if not conn.execute(check_query).all():
+        if not conn.execute(check_query).first():
             conn.execute(insert(Student), values)
             conn.commit()
 
 
 def insert_test(values):
     with engine.connect() as conn:
-        values['subtest'] = True if values['subtest'].lower() == 'так' else False
         conn.execute(insert(Test), values)
         conn.commit()
 

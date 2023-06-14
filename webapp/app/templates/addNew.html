@@ -9,7 +9,7 @@
 <nav class="navbtn">
     <a href="{{ url_for('main_page') }}" class="bar-item">Home</a>
 </nav>
-    <form action="{{ url_for('insert_test')}}" method="POST">
+    <form>
 		{{ form.hidden_tag() }}
 		<div class="row">
         	<div class="column">
@@ -100,12 +100,9 @@
 
 		    	<label for="test_status">test_status :</label>
 				<input type="text" id="test_status" name="test_status" placeholder="test_status"><br>
-
   			</div>
 		</div>
 		<button class="add_btn" type="submit">Add</button>
 	   </form>
-
-
 </body>
 </html>

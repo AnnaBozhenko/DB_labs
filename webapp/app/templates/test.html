@@ -11,6 +11,52 @@
    <a href="{{ url_for('main_page') }}" class="bar-item">Home</a>
   </nav>
   <h1>Test</h1>
+  <form class="crud-action" action="{{url_for('update_testinfo')}}" method="post">
+      <p>Update by ID/Insert</p>
+          <label for="testid">Test ID:</label>
+          <input type="number" id="testid" name="testid">
+          
+          <label for="instid">Institution ID:</label>
+          <input type="number" id="instid" name="instid">
+
+          <label for="testyear">Test year:</label>
+          <input type="number" id="testyear" name="testyear">
+      
+          <label for="adaptscale">Adaptational scale:</label>
+          <input type="number" id="adaptscale" name="adaptscale">
+      
+          <label for="ball12">Ball (12-scale):</label>
+          <input type="number" id="ball12" name="ball12">
+
+          <label for="ball100">Ball (100-scale):</label>
+          <input type="number" id="ball100" name="ball100">
+
+          <label for="ball">Ball:</label>
+          <input type="number" id="ball" name="ball">
+
+          <label for="subtest">Subtest:</label>
+          <input type="text" id="subtest" name="subtest">
+
+          <label for="outid">Student ID:</label>
+          <input type="text" id="outid" name="outid">
+
+          <label for="testname">Test name:</label>
+          <input type="text" id="testname" name="testname">
+
+          <label for="dpalevel">DPA Level:</label>
+          <input type="text" id="dpalevel" name="dpalevel">
+
+          <label for="testlang">Test Language:</label>
+          <input type="text" id="testlang" name="testlang">
+
+          <label for="teststatus">Test status:</label>
+          <input type="text" id="teststatus" name="teststatus">
+          <div>
+            <button type="submit">Update</button>
+            <button type="submit" formaction="{{url_for('insert_testinfo')}}">Insert</button>
+          </div>    
+    </form>
+
   <table id="demo">
     <thead>
       <tr>
@@ -28,7 +74,7 @@
         {% endfor %}
           <th>
           <form action="{{url_for('del_test')}}" method="POST">
-								<input type="hidden" name="testId" value="{{ test.testid }}"/>
+								<input type="hidden" name="testid" value="{{ test.testid }}"/>
                                 <button class="delete_btn" type="submit">Delete</button>
 							</form></th>
         </tr>

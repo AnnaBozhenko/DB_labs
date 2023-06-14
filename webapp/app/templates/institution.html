@@ -12,6 +12,27 @@
    <a href="{{ url_for('main_page') }}" class="bar-item">Home</a>
   </nav>
   <h1>Institution</h1>
+  <form class="crud-action" action="{{url_for('update_institutioninfo')}}" method="post">
+      <p>Update by ID/Insert</p>
+          <label for="instid">Institution ID:</label>
+          <input type="number" id="instid" name="instid">
+          
+          <label for="instname">Institution name:</label>
+          <input type="text" id="instname" name="instname">
+
+          <label for="locationid">Location ID:</label>
+          <input type="number" id="locationid" name="locationid">
+      
+          <label for="insttype">Institution type:</label>
+          <input type="text" id="insttype" name="insttype">
+      
+          <label for="instparent">Institution parent:</label>
+          <input type="text" id="instparent" name="instparent">
+          <div>
+            <button type="submit">Update</button>
+            <button type="submit" formaction="{{ url_for('insert_inst') }}">Insert</button>
+          </div>
+    </form>
   <table id="demo">
     <thead>
       <tr>
@@ -28,7 +49,7 @@
         {% endfor %}
           <th>
       <form action="{{url_for('del_institution')}}" method="POST">
-								<input type="hidden" name="inst_Id" value="{{ institution.instid }}"/>
+								<input type="hidden" name="instid" value="{{ institution.instid }}"/>
                                 <button class="delete_btn" type="submit">Delete</button>
 							</form></th>
         </tr>

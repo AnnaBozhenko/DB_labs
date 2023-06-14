@@ -2,7 +2,7 @@ from flask import redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SubmitField,  SelectField, SelectMultipleField
 from . import app
-from .models import get_statistics, get_locationinfo, insert_data, get_institution, get_student, get_test, delete_location, delete_institution, delete_student, delete_test
+from .models import get_statistics, get_locationinfo, insert_data, get_institution, get_student, get_test, delete_location, delete_institution, delete_student, delete_test, insert_institution, insert_student, insert_test, update_location, update_institution, update_student, update_test, insert_location
 
 class UpdateTables(FlaskForm):
     student_id = StringField('student_id')
@@ -65,6 +65,7 @@ reg_all = ["Вінницька область", "Волинська област
 
 test_year = [(2016, '2016'), (2017, '2017'), (2018, '2018'), (2019, '2019'), (2020, '2020'), (2021, '2021')]
 ball_func = [('min', 'Min'), ('max', 'Max'), ('avg', 'Avg')]
+
 class Statistic(FlaskForm):
     subject = SelectField('subject', choices=sub, coerce=str)
     year = SelectMultipleField('year', choices=test_year, coerce=int)
@@ -80,19 +81,183 @@ def main_page():
 @app.route('/location_info', methods=['GET', 'POST'])
 def location_info():
     columns = ("AreaName", "RegName", "TerName", "LocationID", "Delete Button")
-    locations = get_locationinfo()
+    locations = get_locationinfo()[:1000]
     return render_template('location.html', columns=columns, locations=locations)
 
-@app.route('/location_info/delete', methods=['POST'])
+
+@app.route('/location_info/insert_locationinfo', methods=['POST'])
+def insert_locationinfo():
+    new_row = {'areaname': request.form['areaname'],
+               'tername': request.form['tername'],
+               'regname': request.form['regname']}
+    if all([value is not None for value in new_row.values()]):
+        insert_location(new_row)
+    return redirect(url_for('location_info'))
+
+
+@app.route('/location_info/update_locationinfo', methods=['POST'])
+def update_locationinfo():
+    values_on_update = {'locationid': request.form['locationid'],
+                        'areaname': request.form['areaname'],
+                        'tername': request.form['tername'],
+                        'regname': request.form['regname']}
+    if values_on_update['locationid']:
+        update_location(values_on_update)        
+    return redirect(url_for('location_info'))
+    
+
+@app.route('/location_info/del_location', methods=['POST'])
 def del_location():
-    location_id = request.form['location_id']
+    location_id = request.form['locationid']
     delete_location(location_id)
     return redirect(url_for('location_info'))
 
 
+@app.route('/institution_info', methods=['GET', 'POST'])
+def institution_info():
+    columns = ("InstitutionName", "LocationID", "InstitutionType", "Parent", "InstitutionID", "Delete Button")
+    institutions = get_institution()[:1000]
+    return render_template('institution.html', columns=columns, institutions=institutions)
+
+
+@app.route('/institution_info/insert_inst', methods=['POST'])
+def insert_inst():
+    row_to_insert = {'instname': request.form['instname'],
+                    'locationid': request.form['locationid'],
+                    'insttype': request.form['insttype'],
+                    'instparent': request.form['instparent']}
+    if all([value is not None for value in [row_to_insert['instname'], row_to_insert['locationid']]]):
+        insert_institution(row_to_insert)
+    return redirect(url_for('institution_info'))
+
+
+@app.route('/institution_info/update_institutioninfo', methods=['POST'])
+def update_institutioninfo():
+    values_on_update = {'instid': request.form['instid'],
+                        'instname': request.form['instname'],
+                        'locationid': request.form['locationid'],
+                        'insttype': request.form['insttype'],
+                        'instparent': request.form['instparent']}
+    if values_on_update['instid']:
+        update_institution(values_on_update)        
+    return redirect(url_for('institution_info'))
+
+
+@app.route('/institution_info/del_institution', methods=['POST'])
+def del_institution():
+    inst_Id = request.form['instid']
+    delete_institution(inst_Id)
+    return redirect(url_for('institution_info'))
+
+
+@app.route('/student_info/insert_studentinfo', methods=['POST'])
+def insert_studentinfo():
+    row_to_insert =     {'outid': request.form['outid'],
+                        'birth': request.form['birth'],
+                        'locationid': request.form['locationid'],
+                        'sextypename': request.form['sextypename'],
+                        'regtypename': request.form['regtypename'],
+                        'classprofilename': request.form['classprofilename'],
+                        'classlangname': request.form['classlangname'],
+                        'instid': request.form['instid']}
+    if all([value is not None for value in [row_to_insert['outid'], row_to_insert['locationid']]]):
+        insert_student(row_to_insert)
+    return redirect(url_for('student_info'))
+
+
+@app.route('/student_info/update_studentinfo', methods=['POST'])
+def update_studentinfo():
+    values_on_update = {'outid': request.form['outid'],
+                        'birth': request.form['birth'],
+                        'locationid': request.form['locationid'],
+                        'sextypename': request.form['sextypename'],
+                        'regtypename': request.form['regtypename'],
+                        'classprofilename': request.form['classprofilename'],
+                        'classlangname': request.form['classlangname'],
+                        'instid': request.form['instid']}
+    if values_on_update['outid']:
+        update_student(values_on_update)        
+    return redirect(url_for('student_info'))
+
+
+@app.route('/student_info', methods=['GET', 'POST'])
+def student_info():
+    columns = ("OUTID", "Birth", "SexType", "LocationID", "StudentType", "ProfileName", "ClassLang", "InstitutionID", "Delete Button")
+    students = get_student()[:1000]
+    return render_template('student.html', columns=columns, students=students)
+
+
+@app.route('/student_info/del_student', methods=['POST'])
+def del_student():
+    outid = request.form['outid']
+    print(outid)
+    delete_student(outid)
+    return redirect(url_for('student_info'))
+
+
+@app.route('/test_info/insert_testinfo', methods=['POST'])
+def insert_testinfo():
+    subtest = request.form['subtest']
+    if subtest is not None:
+        subtest = True if subtest.lower() == 'так' else False
+    print(f"test subtest value: {subtest}")
+    row_to_insert =     {'instid': request.form['instid'],
+                        'testyear': request.form['testyear'],
+                        'adaptscale': request.form['adaptscale'],
+                        'ball12': request.form['ball12'],
+                        'ball100': request.form['ball100'],
+                        'ball': request.form['ball'],
+                        'subtest': subtest,
+                        'outid': request.form['outid'],
+                        'testname': request.form['testname'],
+                        'dpalevel': request.form['dpalevel'],
+                        'testlang': request.form['testlang'],
+                        'teststatus': request.form['teststatus']}
+    if all([value is not None for value in [row_to_insert['instid'], row_to_insert['testyear'], row_to_insert['outid'], row_to_insert['testname']]]):
+        insert_test(row_to_insert)
+    return redirect(url_for('test_info'))
+
+
+@app.route('/test_info', methods=['GET', 'POST'])
+def test_info():
+    columns = ("InstitutionID", "TestYear", "AdaptScale", "Ball12", "Ball100", "Ball", "SubTest", "OUTID", "Subject", "DPALevel",
+               "Lang", "TestStatus", "TestID", "Delete Button")
+    tests = get_test()[:1000]
+    return render_template('test.html', columns=columns, tests=tests)
+
+
+@app.route('/test_info/del_test', methods=['POST'])
+def del_test():
+    testId = request.form['testid']
+    delete_test(testId)
+    return redirect(url_for('test_info'))
+
+@app.route('/test_info/update_testinfo', methods=['POST'])
+def update_testinfo():
+    subtest = request.form['subtest']
+    if subtest:
+        subtest = True if subtest.lower() == 'так' else False
+    values_on_update = {'testid': request.form['testid'],
+                        'instid': request.form['instid'],
+                        'testyear': request.form['testyear'],
+                        'adaptscale': request.form['adaptscale'],
+                        'ball12': request.form['ball12'],
+                        'ball100': request.form['ball100'],
+                        'ball': request.form['ball'],
+                        'subtest': subtest,
+                        'outid': request.form['outid'],
+                        'testname': request.form['testname'],
+                        'dpalevel': request.form['dpalevel'],
+                        'testlang': request.form['testlang'],
+                        'teststatus': request.form['teststatus']}
+    if values_on_update['testid']:
+        update_test(values_on_update)        
+    return redirect(url_for('test_info'))
+
+
 # створити роут для вставки в базу
 @app.route('/add_data', methods=['GET', 'POST'])
-def insert_test():
+def add_data():
     form = UpdateTables(request.form)
     if request.method == 'POST':
     # write here maps of forms
@@ -126,54 +291,12 @@ def insert_test():
         'test_lang': request.form.get("test_lang"),
         'test_status': request.form.get("test_status")}
 
+        values['subtest'] = True if values['subtest'].lower() == 'так' else False 
+
         insert_data(values)
         return redirect(url_for('main_page'))
     return render_template('addNew.html', form=form, action='add_data')
 
-
-@app.route('/institution', methods=['GET', 'POST'])
-def institution_info():
-    columns = ("InstitutionName", "LocationID", "InstitutionType", "Parent", "InstitutionID", "Delete Button")
-    institutions = get_institution()[:1000]
-
-    return render_template('institution.html', columns=columns, institutions=institutions)
-
-@app.route('/institution/delete', methods=['POST'])
-def del_institution():
-    inst_Id = request.form['inst_Id']
-    print('*****', inst_Id)
-    delete_institution(inst_Id)
-    return redirect(url_for('institution_info'))
-
-@app.route('/student', methods=['GET', 'POST'])
-def student_info():
-    columns = ("OUTID", "Birth", "SexType", "LocationID", "StudentType", "ProfileName", "ClassLang", "InstitutionID", "Delete Button")
-    students = get_student()[:1000]
-    return render_template('student.html', columns=columns, students=students)
-
-@app.route('/student/delete', methods=['POST'])
-def del_student():
-    outid = request.form['outid']
-    print(outid)
-    delete_student(outid)
-
-    return redirect(url_for('student_info'))
-
-
-@app.route('/test', methods=['GET', 'POST'])
-def test_info():
-    columns = ("InstitutionID", "TestYear", "AdaptScale", "Ball12", "Ball100", "Ball", "SubTest", "OUTID", "Subject", "DPALevel",
-               "Lang", "TestStatus", "TestID", "Delete Button")
-    tests = get_test()[:1000]
-    return render_template('test.html', columns=columns, tests=tests)
-
-
-@app.route('/test/delete', methods=['POST'])
-def del_test():
-    testId = request.form['testId']
-    print(testId)
-    delete_test(testId)
-    return redirect(url_for('test_info'))
 
 @app.route('/statistics', methods=['GET', 'POST'])
 def statistics():
@@ -194,5 +317,5 @@ def statistics():
             regions = reg_all
         result = get_statistics(years=years, regions=regions, subjects=subject, ball_function=ball_function, teststatus='Зараховано')
         if len(result) > 1000:
-            result = result[:1000]
+            result = result
     return render_template('statistics.html', form=form, headers=headers, statistics_data=result)
