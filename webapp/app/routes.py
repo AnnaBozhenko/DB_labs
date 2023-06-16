@@ -2,8 +2,36 @@ from flask import redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SubmitField,  SelectField, SelectMultipleField
 from . import app
-from .models import get_statistics, get_locationinfo, insert_data, get_institution, get_student, get_test, delete_location, delete_institution, delete_student, delete_test, insert_institution, insert_student, insert_test, update_location, update_institution, update_student, update_test, insert_location
+from .models import get_statistics, get_locationinfo, insert_data, get_institution, get_student, get_test, delete_location, \
+    delete_institution, delete_student, delete_test, insert_institution, insert_student, insert_test, update_location, update_institution, \
+    update_student, update_test, insert_location, LocationInfo
 
+from sqlalchemy import MetaData, Table, insert, select, update, func, delete, desc, ForeignKey
+from .mongoModels import MongoLocationInfo
+from . import engine
+
+
+################################################
+########### Migration to MongoDB ###############
+################################################
+with engine.connect() as conn:
+    query_locations = select(LocationInfo).order_by(desc(LocationInfo.c.locationid))
+    locations = conn.execute(query_locations).all()
+    i = 0
+    for loc in locations:
+        if i % 1000 == 0:
+            print(loc[3], loc[2], loc[1], loc[0])
+        MongoLocationInfo.insert_data(loc[3], loc[2], loc[1], loc[0])
+        i += 1
+print('Finish for LocationInfo')
+###########################################
+
+# n = int(input('for mongo input 1: '))
+n = 1
+if n == 1:
+    db = 'mongo'
+else:
+    db = 'postgres'
 
 class UpdateTables(FlaskForm):
     student_id = StringField('student_id')
@@ -82,7 +110,13 @@ def main_page():
 @app.route('/location_info', methods=['GET', 'POST'])
 def location_info():
     columns = ("AreaName", "RegName", "TerName", "LocationID", "Delete Button")
-    locations = get_locationinfo()[:1000]
+    if db == 'postgres':
+        print('This won`t be print')
+        locations = get_locationinfo()[:1000]
+    else:
+        locations = MongoLocationInfo.info()[:1000]
+        print(f'Database: {db}')
+        print(locations[10])
     return render_template('location.html', columns=columns, locations=locations)
 
 
