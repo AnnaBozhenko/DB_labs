@@ -2,8 +2,34 @@ from flask import redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SubmitField,  SelectField, SelectMultipleField
 from . import app
-from .models import get_statistics, get_locationinfo, insert_data, get_institution, get_student, get_test, delete_location, delete_institution, delete_student, delete_test, insert_institution, insert_student, insert_test, update_location, update_institution, update_student, update_test, insert_location
+from .models import get_statistics, get_locationinfo, insert_data, get_institution, get_student, get_test, delete_location, \
+    delete_institution, delete_student, delete_test, insert_institution, insert_student, insert_test, update_location, update_institution, \
+    update_student, update_test, insert_location, LocationInfo
+
+from sqlalchemy import MetaData, Table, insert, select, update, func, delete, desc, ForeignKey
 from .mongoModels import MongoLocationInfo
+from . import engine
+
+
+################################################
+########### Migration to MongoDB ###############
+################################################
+with engine.connect() as conn:
+    query_locations = select(LocationInfo).order_by(desc(LocationInfo.c.locationid))
+    locations = conn.execute(query_locations).all()
+    for loc in locations:
+        MongoLocationInfo.insert_data(loc.c.locationid, loc.c.areaname, loc.c.regname, loc.c.tername)
+
+
+
+
+
+
+
+
+
+###########################################
+
 n = int(input('for mongo input 1: '))
 if n == 1:
     db = 'mongo'
