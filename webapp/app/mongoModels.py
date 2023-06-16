@@ -8,7 +8,7 @@ mongo_db = mongo_client['zno']
 class MongoLocationInfo:
     col = mongo_db['collLocationInfo']
     doc = {
-        '_id': ,
+        # '_id': ,
         'locationid': 'NULL',
         'areaname': 'NULL',
         'regname': 'NULL',
@@ -44,6 +44,9 @@ class MongoLocationInfo:
 
     @classmethod
     def info(cls):
-        res = list(cls.col.find({}))
-        return res
+        res = cls.col.find({}, {"_id": 0})
+        result = []
+        for i in res:
+            result.append(i.values())
+        return result
 

@@ -20,7 +20,7 @@ with engine.connect() as conn:
     i = 0
     for loc in locations:
         if i % 1000 == 0:
-            print(loc)
+            print(loc[3], loc[2], loc[1], loc[0])
         MongoLocationInfo.insert_data(loc[3], loc[2], loc[1], loc[0])
         i += 1
 print('Finish for LocationInfo')
@@ -116,6 +116,7 @@ def location_info():
     else:
         locations = MongoLocationInfo.info()[:1000]
         print(f'Database: {db}')
+        print(locations[10])
     return render_template('location.html', columns=columns, locations=locations)
 
 
