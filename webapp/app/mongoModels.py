@@ -1,11 +1,14 @@
+#from webapp.config import mongo_db
 import pymongo
 
-mongo_client = pymongo.MongoClient('mongodb://localhost:27017/')
+mongo_client = pymongo.MongoClient('mongodb://user:pass@mongodb:27017/')
 mongo_db = mongo_client['zno']
 
+
 class MongoLocationInfo:
-    col = mongo_db('collLocationInfo')
+    col = mongo_db['collLocationInfo']
     doc = {
+        '_id': ,
         'locationid': 'NULL',
         'areaname': 'NULL',
         'regname': 'NULL',
@@ -14,6 +17,9 @@ class MongoLocationInfo:
 
     @classmethod
     def insert_data(cls, locationid, areaname, regname, tername):
+        if locationid is 'NoneType':
+            return f''
+
         doc = {
             'locationId': int(locationid),
             'areaname': str(areaname) if areaname is not None else 'NULL',

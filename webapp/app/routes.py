@@ -17,20 +17,17 @@ from . import engine
 with engine.connect() as conn:
     query_locations = select(LocationInfo).order_by(desc(LocationInfo.c.locationid))
     locations = conn.execute(query_locations).all()
+    i = 0
     for loc in locations:
-        MongoLocationInfo.insert_data(loc.c.locationid, loc.c.areaname, loc.c.regname, loc.c.tername)
-
-
-
-
-
-
-
-
-
+        if i % 1000 == 0:
+            print(loc)
+        MongoLocationInfo.insert_data(loc[3], loc[2], loc[1], loc[0])
+        i += 1
+print('Finish for LocationInfo')
 ###########################################
 
-n = int(input('for mongo input 1: '))
+# n = int(input('for mongo input 1: '))
+n = 1
 if n == 1:
     db = 'mongo'
 else:
@@ -114,9 +111,11 @@ def main_page():
 def location_info():
     columns = ("AreaName", "RegName", "TerName", "LocationID", "Delete Button")
     if db == 'postgres':
+        print('This won`t be print')
         locations = get_locationinfo()[:1000]
     else:
         locations = MongoLocationInfo.info()[:1000]
+        print(f'Database: {db}')
     return render_template('location.html', columns=columns, locations=locations)
 
 
