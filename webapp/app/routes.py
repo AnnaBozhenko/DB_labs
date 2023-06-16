@@ -3,7 +3,12 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SubmitField,  SelectField, SelectMultipleField
 from . import app
 from .models import get_statistics, get_locationinfo, insert_data, get_institution, get_student, get_test, delete_location, delete_institution, delete_student, delete_test, insert_institution, insert_student, insert_test, update_location, update_institution, update_student, update_test, insert_location
-
+from .mongoModels import MongoLocationInfo
+n = int(input('for mongo input 1: '))
+if n == 1:
+    db = 'mongo'
+else:
+    db = 'postgres'
 
 class UpdateTables(FlaskForm):
     student_id = StringField('student_id')
@@ -82,7 +87,10 @@ def main_page():
 @app.route('/location_info', methods=['GET', 'POST'])
 def location_info():
     columns = ("AreaName", "RegName", "TerName", "LocationID", "Delete Button")
-    locations = get_locationinfo()[:1000]
+    if db == 'postgres':
+        locations = get_locationinfo()[:1000]
+    else:
+        locations = MongoLocationInfo.info()[:1000]
     return render_template('location.html', columns=columns, locations=locations)
 
 
