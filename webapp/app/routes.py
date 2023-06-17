@@ -2,63 +2,74 @@ from flask import redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SubmitField,  SelectField, SelectMultipleField
 from . import app
-from .models import get_statistics, get_locationinfo, insert_data, get_institution, get_student, get_test, delete_location, \
-    delete_institution, delete_student, delete_test, insert_institution, insert_student, insert_test, update_location, update_institution, \
-    update_student, update_test, insert_location, LocationInfo, Institution, Student, Test
+# from .models import get_statistics, get_locationinfo, insert_data, get_institution, get_student, get_test, delete_location, \
+#     delete_institution, delete_student, delete_test, insert_institution, insert_student, insert_test, update_location, update_institution, \
+#     update_student, update_test, insert_location, LocationInfo, Institution, Student, Test
+from .models import PGLocationInfo, PGInstitution, PGStudent, PGTest, get_statistics, insert_data
 
-from sqlalchemy import MetaData, Table, insert, select, update, func, delete, desc, ForeignKey
-from .mongoModels import MongoLocationInfo, MongoInstitution, MongoStudent, MongoTest
-from . import engine
+# from sqlalchemy import MetaData, Table, insert, select, update, func, delete, desc, ForeignKey
+# from .mongoModels import MongoLocationInfo, MongoInstitution, MongoStudent, MongoTest
+from .mongo_logics import *
+# from . import engine
 
 
 ################################################
 ########### Migration to MongoDB ###############
 ################################################
-with engine.connect() as conn:
-    query_locations = select(LocationInfo).order_by(desc(LocationInfo.c.locationid))
-    locations = conn.execute(query_locations).all()
-    #print(locations[10][0], locations[10][1], locations[10][2], locations[10][3])
-    for loc in locations:
-        MongoLocationInfo.insert_data(loc[3], loc[2], loc[1], loc[0])
-print('Finish for LocationInfo')
+# with engine.connect() as conn:
+#     query_locations = select(LocationInfo).order_by(desc(LocationInfo.c.locationid))
+#     locations = conn.execute(query_locations).all()
+#     #print(locations[10][0], locations[10][1], locations[10][2], locations[10][3])
+#     for loc in locations:
+#         MongoLocationInfo.insert_data(loc[3], loc[2], loc[1], loc[0])
+# print('Finish for LocationInfo')
 
 
-with engine.connect() as conn:
-    query_institution = select(Institution).order_by(desc(Institution.c.instid))
-    institutions = conn.execute(query_institution).all()
-    print(institutions[10][0], institutions[10][1], institutions[10][2], institutions[10][3], institutions[10][4])
-    for inst in institutions:
-        MongoInstitution.insert_data(inst[0], inst[1], inst[2], inst[3], inst[4])
-print('Finish for Institution')
+# with engine.connect() as conn:
+#     query_institution = select(Institution).order_by(desc(Institution.c.instid))
+#     institutions = conn.execute(query_institution).all()
+#     print(institutions[10][0], institutions[10][1], institutions[10][2], institutions[10][3], institutions[10][4])
+#     for inst in institutions:
+#         MongoInstitution.insert_data(inst[0], inst[1], inst[2], inst[3], inst[4])
+# print('Finish for Institution')
 
 
-with engine.connect() as conn:
-    query_student = select(Student)
-    students = conn.execute(query_student).all()
-    print(students[100][0], students[100][1], students[100][2], students[100][3], students[100][4], students[100][5], students[100][6], students[100][7])
-    for stud in students:
-        MongoStudent.insert_data(stud[0], stud[1], stud[2], stud[3], stud[4], stud[5], stud[6], stud[7])
-print('Finish for Student')
+# with engine.connect() as conn:
+#     query_student = select(Student)
+#     students = conn.execute(query_student).all()
+#     print(students[100][0], students[100][1], students[100][2], students[100][3], students[100][4], students[100][5], students[100][6], students[100][7])
+#     for stud in students:
+#         MongoStudent.insert_data(stud[0], stud[1], stud[2], stud[3], stud[4], stud[5], stud[6], stud[7])
+# print('Finish for Student')
 
 
-with engine.connect() as conn:
-    query_test = select(Test).order_by(desc(Test.c.testid))
-    tests = conn.execute(query_test).all()
-    print(tests[10][0], tests[10][1], tests[10][2], tests[10][3], tests[10][4], tests[10][5], tests[10][6], tests[10][7], tests[10][8], tests[10][9], tests[10][10], tests[10][11], tests[10][12])
-    for test in tests:
-        MongoTest.insert_data(test[0], test[1], test[2], test[3], test[4], test[5], test[6], test[7],
-                                 test[8], test[9], test[10], test[11], test[12])
-print('Finish for Test')
+# with engine.connect() as conn:
+#     query_test = select(Test).order_by(desc(Test.c.testid))
+#     tests = conn.execute(query_test).all()
+#     print(tests[10][0], tests[10][1], tests[10][2], tests[10][3], tests[10][4], tests[10][5], tests[10][6], tests[10][7], tests[10][8], tests[10][9], tests[10][10], tests[10][11], tests[10][12])
+#     for test in tests:
+#         MongoTest.insert_data(test[0], test[1], test[2], test[3], test[4], test[5], test[6], test[7],
+#                                  test[8], test[9], test[10], test[11], test[12])
+# print('Finish for Test')
 
-print('Migrations for MongoDB were finished')
+# print('Migrations for MongoDB were finished')
 ###########################################
 
 # n = int(input('for mongo input 1: '))
-n = 1
+n = 2
 if n == 1:
     db = 'mongo'
+    locations = MongoLocationInfo()
+    institutions = MongoInstitution()
+    students = MongoStudent()
+    tests = MongoTest()
 else:
     db = 'postgres'
+    locations = PGLocationInfo()
+    institutions = PGInstitution()
+    students = PGStudent()
+    tests = PGTest()
+
 
 class UpdateTables(FlaskForm):
     student_id = StringField('student_id')
@@ -137,14 +148,11 @@ def main_page():
 @app.route('/location_info', methods=['GET', 'POST'])
 def location_info():
     columns = ("AreaName", "RegName", "TerName", "LocationID", "Delete Button")
-    if db == 'postgres':
-        print('This won`t be print')
-        locations = get_locationinfo()[:1000]
-    else:
-        locations = MongoLocationInfo.info()[:1000]
-        print(f'Database: {db}')
-        print(locations[10])
-    return render_template('location.html', columns=columns, locations=locations)
+    result = locations.info()[:1000]
+    # locations = MongoLocationInfo.info()[:1000]
+    # print(f'Database: {db}')
+    # print(locations[10])
+    return render_template('location.html', columns=columns, locations=result)
 
 
 @app.route('/location_info/insert_locationinfo', methods=['POST'])
@@ -153,7 +161,8 @@ def insert_locationinfo():
                'tername': request.form['tername'],
                'regname': request.form['regname']}
     if all([value is not None for value in new_row.values()]):
-        insert_location(new_row)
+        locations.insert(new_row)
+        # insert_location(new_row)
     return redirect(url_for('location_info'))
 
 
@@ -164,22 +173,25 @@ def update_locationinfo():
                         'tername': request.form['tername'],
                         'regname': request.form['regname']}
     if values_on_update['locationid']:
-        update_location(values_on_update)        
+        locations.update(values_on_update)
+        # update_location(values_on_update)        
     return redirect(url_for('location_info'))
     
 
 @app.route('/location_info/del_location', methods=['POST'])
 def del_location():
     location_id = request.form['locationid']
-    delete_location(location_id)
+    locations.delete(location_id)
+    # delete_location(location_id)
     return redirect(url_for('location_info'))
 
 
 @app.route('/institution_info', methods=['GET', 'POST'])
 def institution_info():
     columns = ("InstitutionName", "LocationID", "InstitutionType", "Parent", "InstitutionID", "Delete Button")
-    institutions = get_institution()[:1000]
-    return render_template('institution.html', columns=columns, institutions=institutions)
+    result = institutions.info()[:1000]
+    # institutions = get_institution()[:1000]
+    return render_template('institution.html', columns=columns, institutions=result)
 
 
 @app.route('/institution_info/insert_inst', methods=['POST'])
@@ -189,7 +201,8 @@ def insert_inst():
                     'insttype': request.form['insttype'],
                     'instparent': request.form['instparent']}
     if all([value is not None for value in [row_to_insert['instname'], row_to_insert['locationid']]]):
-        insert_institution(row_to_insert)
+        # insert_institution(row_to_insert)
+        institutions.insert(row_to_insert)
     return redirect(url_for('institution_info'))
 
 
@@ -201,14 +214,16 @@ def update_institutioninfo():
                         'insttype': request.form['insttype'],
                         'instparent': request.form['instparent']}
     if values_on_update['instid']:
-        update_institution(values_on_update)        
+        institutions.update(values_on_update)
+        # update_institution(values_on_update)        
     return redirect(url_for('institution_info'))
 
 
 @app.route('/institution_info/del_institution', methods=['POST'])
 def del_institution():
     inst_Id = request.form['instid']
-    delete_institution(inst_Id)
+    institutions.delete(inst_Id)
+    # delete_institution(inst_Id)
     return redirect(url_for('institution_info'))
 
 
@@ -223,7 +238,8 @@ def insert_studentinfo():
                         'classlangname': request.form['classlangname'],
                         'instid': request.form['instid']}
     if all([value is not None for value in [row_to_insert['outid'], row_to_insert['locationid']]]):
-        insert_student(row_to_insert)
+        students.insert(row_to_insert)
+        # insert_student(row_to_insert)
     return redirect(url_for('student_info'))
 
 
@@ -238,22 +254,24 @@ def update_studentinfo():
                         'classlangname': request.form['classlangname'],
                         'instid': request.form['instid']}
     if values_on_update['outid']:
-        update_student(values_on_update)        
+        students.update(values_on_update)
+        # update_student(values_on_update)        
     return redirect(url_for('student_info'))
 
 
 @app.route('/student_info', methods=['GET', 'POST'])
 def student_info():
     columns = ("OUTID", "Birth", "SexType", "LocationID", "StudentType", "ProfileName", "ClassLang", "InstitutionID", "Delete Button")
-    students = get_student()[:1000]
-    return render_template('student.html', columns=columns, students=students)
+    result = students.info()[:1000]
+    # students = get_student()[:1000]
+    return render_template('student.html', columns=columns, students=result)
 
 
 @app.route('/student_info/del_student', methods=['POST'])
 def del_student():
     outid = request.form['outid']
-    print(outid)
-    delete_student(outid)
+    students.delete(outid)
+    # delete_student(outid)
     return redirect(url_for('student_info'))
 
 
@@ -276,7 +294,8 @@ def insert_testinfo():
                         'testlang': request.form['testlang'],
                         'teststatus': request.form['teststatus']}
     if all([value is not None for value in [row_to_insert['instid'], row_to_insert['testyear'], row_to_insert['outid'], row_to_insert['testname']]]):
-        insert_test(row_to_insert)
+        tests.insert(row_to_insert)
+        # insert_test(row_to_insert)
     return redirect(url_for('test_info'))
 
 
@@ -284,14 +303,16 @@ def insert_testinfo():
 def test_info():
     columns = ("InstitutionID", "TestYear", "AdaptScale", "Ball12", "Ball100", "Ball", "SubTest", "OUTID", "Subject", "DPALevel",
                "Lang", "TestStatus", "TestID", "Delete Button")
-    tests = get_test()[:1000]
-    return render_template('test.html', columns=columns, tests=tests)
+    result = tests.info()[:1000]
+    # tests = get_test()[:1000]
+    return render_template('test.html', columns=columns, tests=result)
 
 
 @app.route('/test_info/del_test', methods=['POST'])
 def del_test():
     testId = request.form['testid']
-    delete_test(testId)
+    tests.delete(testId)
+    # delete_test(testId)
     return redirect(url_for('test_info'))
 
 @app.route('/test_info/update_testinfo', methods=['POST'])
@@ -313,7 +334,8 @@ def update_testinfo():
                         'testlang': request.form['testlang'],
                         'teststatus': request.form['teststatus']}
     if values_on_update['testid']:
-        update_test(values_on_update)        
+        tests.update(values_on_update)
+        # update_test(values_on_update)        
     return redirect(url_for('test_info'))
 
 
