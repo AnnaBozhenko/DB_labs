@@ -8,24 +8,24 @@
   <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" type="text/css" />
 </head>
 
-<body>
+<body class="main-page">
   <a href="{{ url_for('location_info') }}">
-    <button class="btn location">LocationInfo</button>
+    <button class="btn">LocationInfo</button>
   </a>
   <a href="{{ url_for('institution_info') }}">
-    <button class="btn institution">Institution</button>
+    <button class="btn">Institution</button>
   </a>
   <a href="{{ url_for('student_info') }}">
-    <button class="btn student">Student</button>
+    <button class="btn">Student</button>
   </a>
   <a href="{{ url_for('test_info') }}">
-    <button class="btn test">Test</button>
+    <button class="btn">Test</button>
   </a>
   <a href="{{ url_for('statistics') }}">
-    <button class="btn queries">Statistics</button>
+    <button class="btn">Statistics</button>
   </a>
   <a href="{{ url_for('add_data') }}">
-    <button class="btn add_new">Add Data</button>
+    <button class="btn">Add Data</button>
   </a>
 
 </body>

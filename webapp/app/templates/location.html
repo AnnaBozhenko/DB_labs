@@ -11,24 +11,24 @@
    <a href="{{ url_for('main_page') }}" class="bar-item">Home</a>
   </nav>
   <h1>LocationInfo</h1>
-    <form class="crud-action" method="post">
+    <form class="crud-action" method="post" action="{{ url_for('location_info') }}">
       <p>Update by ID/Insert</p>
-          <label for="locationid">Location ID:</label>
-          <input type="number" id="locationid" name="locationid">
-          
-          <label for="areaname">Area name:</label>
-          <input type="text" id="areaname" name="areaname">
+      <label for="locationid">Location ID:</label>
+      <input type="number" id="locationid" name="locationid">
       
-          <label for="regname">Region name:</label>
-          <input type="text" id="regname" name="regname">
-      
-          <label for="tername">Territory name:</label>
-          <input type="text" id="tername" name="tername">
-          <div>
-            <button type="submit" formaction="{{url_for('update_locationinfo')}}">Update</button>
-            <button type="submit" formaction="{{url_for('insert_locationinfo')}}">Insert</button>
-          </div>
-        </form>
+      <label for="areaname">Area name:</label>
+      <input type="text" id="areaname" name="areaname">
+  
+      <label for="regname">Region name:</label>
+      <input type="text" id="regname" name="regname">
+  
+      <label for="tername">Territory name:</label>
+      <input type="text" id="tername" name="tername">
+      <div>
+        <button type="submit" formaction="{{url_for('update_locationinfo')}}">Update</button>
+        <button type="submit" formaction="{{url_for('insert_locationinfo')}}">Insert</button>
+      </div>
+    </form>
   <table id="demo">
     <thead>
       <tr>
@@ -48,11 +48,12 @@
 
 
         {% endfor %}
-           <th>
-      <form action="{{url_for('del_location')}}" method="POST">
-								<input type="hidden" name="locationid" value="{{ location.locationid }}"/>
-                <button class="delete_btn" type="submit">Delete</button>
-							</form></th>
+        <th>
+          <form action="{{url_for('del_location')}}" method="POST">
+						<input type="hidden" name="locationid" value="{{ location.locationid }}"/>
+            <button class="delete_btn" type="submit">Delete</button>
+					</form>
+        </th>
 
         </tr>
 

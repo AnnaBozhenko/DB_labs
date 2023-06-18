@@ -142,11 +142,10 @@ class MongoLocationInfo:
 
     def update(cls, doc):
         doc = get_valid_fields(doc)
-        set_doc = dict()
-        for key, value in doc.itms():
-            if key != 'locationid':
-                set_doc[key] = value
-        cls.col.update_one({'locationid': doc['locationid']}, {'$set': set_doc})
+        print("inside update:")
+        print("doc:")
+        print(doc)
+        cls.col.update_one({'locationid': doc['locationid']}, {'$set': doc})
 
     @classmethod
     def exists(cls, locationid):
@@ -214,7 +213,7 @@ class MongoInstitution:
 
     def update(cls, doc):
         try:
-            if 'locationid' not in doc.keys() or not MongoLocationInfo.exists(doc['locationid']):
+            if 'locationid' in doc.keys() and not MongoLocationInfo.exists(doc['locationid']):
                 raise Exception("Location is not present in the database")
             doc = get_valid_fields(doc)
             cls.col.update_one({'instid': doc['instid']}, {'$set': doc})
@@ -294,9 +293,9 @@ class MongoStudent:
 
     def update(cls, doc):
         try:
-            if 'locationid' not in doc.keys() or not MongoLocationInfo.exists(doc['locationid']):
+            if 'locationid' in doc.keys() and not MongoLocationInfo.exists(doc['locationid']):
                 raise Exception("Location is not present in the database")
-            if 'instid' not in doc.keys() or not MongoInstitution.exists(doc['instid']):
+            if 'instid' in doc.keys() and not MongoInstitution.exists(doc['instid']):
                 raise Exception("Institution is not present in the database")
             doc = get_valid_fields(doc)
             cls.col.update_one({'outid': doc['outid']}, {'$set': doc})
@@ -396,9 +395,9 @@ class MongoTest:
 
     def update(cls, doc):
         try:                
-            if 'instid' not in doc.keys() or not MongoInstitution.exists(doc['instid']):
+            if 'instid' in doc.keys() and not MongoInstitution.exists(doc['instid']):
                 raise Exception("Institution is not present in the database")
-            if 'outid' not in doc.keys() or not MongoStudent.exists(doc['outid']):
+            if 'outid' in doc.keys() and not MongoStudent.exists(doc['outid']):
                 raise Exception("Student is not present in the database")
             doc = get_valid_fields(doc)
             cls.col.update_one({'testid': doc['testid']}, {'$set': doc})

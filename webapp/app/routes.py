@@ -1,7 +1,7 @@
 from flask import redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SubmitField,  SelectField, SelectMultipleField
-from . import app
+from . import app, locations, institutions, students, tests
 # from .models import get_statistics, get_locationinfo, insert_data, get_institution, get_student, get_test, delete_location, \
 #     delete_institution, delete_student, delete_test, insert_institution, insert_student, insert_test, update_location, update_institution, \
 #     update_student, update_test, insert_location, LocationInfo, Institution, Student, Test
@@ -9,7 +9,7 @@ from .models import PGLocationInfo, PGInstitution, PGStudent, PGTest, get_statis
 
 # from sqlalchemy import MetaData, Table, insert, select, update, func, delete, desc, ForeignKey
 # from .mongoModels import MongoLocationInfo, MongoInstitution, MongoStudent, MongoTest
-from .mongo_logics import *
+# from .mongo_logics import *
 # from . import engine
 
 
@@ -56,52 +56,20 @@ from .mongo_logics import *
 ###########################################
 
 # n = int(input('for mongo input 1: '))
-n = 2
-if n == 1:
-    db = 'mongo'
-    locations = MongoLocationInfo()
-    institutions = MongoInstitution()
-    students = MongoStudent()
-    tests = MongoTest()
-else:
-    db = 'postgres'
-    locations = PGLocationInfo()
-    institutions = PGInstitution()
-    students = PGStudent()
-    tests = PGTest()
+# n = 2
+# if n == 1:
+#     db = 'mongo'
+#     locations = MongoLocationInfo()
+#     institutions = MongoInstitution()
+#     students = MongoStudent()
+#     tests = MongoTest()
+# else:
+#     db = 'postgres'
+#     locations = PGLocationInfo()
+#     institutions = PGInstitution()
+#     students = PGStudent()
+#     tests = PGTest()
 
-
-class UpdateTables(FlaskForm):
-    student_id = StringField('student_id')
-    student_birth = IntegerField('student_birth')
-    student_sex = StringField('student_sex')
-    student_area = StringField('student_area')
-    student_region = StringField('student_region')
-    student_ter = StringField('student_ter')
-    student_regtype = StringField('student_regtype')
-    class_profile = StringField('class_profile')
-    class_lang = StringField('class_lang')
-    student_inst_name = StringField('student_inst_name')
-    student_inst_area = StringField('student_inst_area')
-    student_inst_region = StringField('student_inst_region')
-    student_inst_ter = StringField('student_inst_ter')
-    student_inst_type = StringField('student_inst_type')
-    student_inst_parent = StringField('student_inst_parent')
-    test_name = StringField('test_name')
-    test_inst_name = StringField('test_inst_name')
-    test_inst_area = StringField('test_inst_area')
-    test_inst_region = StringField('test_inst_region')
-    test_inst_ter = StringField('test_inst_ter')
-    test_year = IntegerField('test_year')
-    adapt_scale = IntegerField('adapt_scale')
-    ball12 = IntegerField('ball12')
-    ball100 = IntegerField('ball100')
-    ball = IntegerField('ball')
-    subtest = StringField('subtest')
-    dpalevel = IntegerField('dpalevel')
-    test_lang = StringField('test_lang')
-    test_status = StringField('test_status')
-    submit = SubmitField("Submit")
 
 sub =[('Українська мова і література', 'Українська мова і література'),  ('Англійська мова', 'Англійська мова'),
       ('Французька мова', 'Французька мова'), ('Іспанська мова', 'Іспанська мова'), ('Німецька мова', 'Німецька мова'),
@@ -140,6 +108,12 @@ class Statistic(FlaskForm):
     ball_function = SelectField('ball_function', choices=ball_func, coerce=str)
     submit = SubmitField("Submit")
 
+def safe_cast(val, to_type, default=None):
+    try:
+        return to_type(val)
+    except (ValueError, TypeError):
+        return default
+
 @app.route('/', methods=['GET', 'POST'])
 def main_page():
     return render_template('index.html')
@@ -165,10 +139,10 @@ def insert_locationinfo():
         # insert_location(new_row)
     return redirect(url_for('location_info'))
 
-
+    
 @app.route('/location_info/update_locationinfo', methods=['POST'])
 def update_locationinfo():
-    values_on_update = {'locationid': request.form['locationid'],
+    values_on_update = {'locationid': safe_cast(request.form['locationid'], int),
                         'areaname': request.form['areaname'],
                         'tername': request.form['tername'],
                         'regname': request.form['regname']}
@@ -180,7 +154,7 @@ def update_locationinfo():
 
 @app.route('/location_info/del_location', methods=['POST'])
 def del_location():
-    location_id = request.form['locationid']
+    location_id = safe_cast(request.form['locationid'], int)
     locations.delete(location_id)
     # delete_location(location_id)
     return redirect(url_for('location_info'))
@@ -197,7 +171,7 @@ def institution_info():
 @app.route('/institution_info/insert_inst', methods=['POST'])
 def insert_inst():
     row_to_insert = {'instname': request.form['instname'],
-                    'locationid': request.form['locationid'],
+                    'locationid': safe_cast(request.form['locationid'], int),
                     'insttype': request.form['insttype'],
                     'instparent': request.form['instparent']}
     if all([value is not None for value in [row_to_insert['instname'], row_to_insert['locationid']]]):
@@ -208,9 +182,9 @@ def insert_inst():
 
 @app.route('/institution_info/update_institutioninfo', methods=['POST'])
 def update_institutioninfo():
-    values_on_update = {'instid': request.form['instid'],
+    values_on_update = {'instid': safe_cast(request.form['instid'], int),
                         'instname': request.form['instname'],
-                        'locationid': request.form['locationid'],
+                        'locationid': safe_cast(request.form['locationid'], int),
                         'insttype': request.form['insttype'],
                         'instparent': request.form['instparent']}
     if values_on_update['instid']:
@@ -221,7 +195,8 @@ def update_institutioninfo():
 
 @app.route('/institution_info/del_institution', methods=['POST'])
 def del_institution():
-    inst_Id = request.form['instid']
+    inst_Id = safe_cast(request.form['instid'], int)
+    print(f"delete {inst_Id}, type: {type(inst_Id)}")
     institutions.delete(inst_Id)
     # delete_institution(inst_Id)
     return redirect(url_for('institution_info'))
@@ -230,13 +205,13 @@ def del_institution():
 @app.route('/student_info/insert_studentinfo', methods=['POST'])
 def insert_studentinfo():
     row_to_insert =     {'outid': request.form['outid'],
-                        'birth': request.form['birth'],
-                        'locationid': request.form['locationid'],
+                        'birth': safe_cast(request.form['birth'], int),
+                        'locationid': safe_cast(request.form['locationid'], int),
                         'sextypename': request.form['sextypename'],
                         'regtypename': request.form['regtypename'],
                         'classprofilename': request.form['classprofilename'],
                         'classlangname': request.form['classlangname'],
-                        'instid': request.form['instid']}
+                        'instid': safe_cast(request.form['instid'], int)}
     if all([value is not None for value in [row_to_insert['outid'], row_to_insert['locationid']]]):
         students.insert(row_to_insert)
         # insert_student(row_to_insert)
@@ -246,13 +221,13 @@ def insert_studentinfo():
 @app.route('/student_info/update_studentinfo', methods=['POST'])
 def update_studentinfo():
     values_on_update = {'outid': request.form['outid'],
-                        'birth': request.form['birth'],
-                        'locationid': request.form['locationid'],
+                        'birth': safe_cast(request.form['birth'], int),
+                        'locationid': safe_cast(request.form['locationid'], int),
                         'sextypename': request.form['sextypename'],
                         'regtypename': request.form['regtypename'],
                         'classprofilename': request.form['classprofilename'],
                         'classlangname': request.form['classlangname'],
-                        'instid': request.form['instid']}
+                        'instid': safe_cast(request.form['instid'], int)}
     if values_on_update['outid']:
         students.update(values_on_update)
         # update_student(values_on_update)        
@@ -277,17 +252,13 @@ def del_student():
 
 @app.route('/test_info/insert_testinfo', methods=['POST'])
 def insert_testinfo():
-    subtest = request.form['subtest']
-    if subtest is not None:
-        subtest = True if subtest.lower() == 'так' else False
-    print(f"test subtest value: {subtest}")
-    row_to_insert =     {'instid': request.form['instid'],
-                        'testyear': request.form['testyear'],
-                        'adaptscale': request.form['adaptscale'],
-                        'ball12': request.form['ball12'],
-                        'ball100': request.form['ball100'],
-                        'ball': request.form['ball'],
-                        'subtest': subtest,
+    row_to_insert =     {'instid': safe_cast(request.form['instid'], int),
+                        'testyear': safe_cast(request.form['testyear'], int),
+                        'adaptscale': safe_cast(request.form['adaptscale'], int),
+                        'ball12': safe_cast(request.form['ball12'], float),
+                        'ball100': safe_cast(request.form['ball100'], float),
+                        'ball': safe_cast(request.form['ball'], float),
+                        'subtest': safe_cast(request.form['subtest'], lambda x: True if x.lower() == 'так' else False),
                         'outid': request.form['outid'],
                         'testname': request.form['testname'],
                         'dpalevel': request.form['dpalevel'],
@@ -310,24 +281,21 @@ def test_info():
 
 @app.route('/test_info/del_test', methods=['POST'])
 def del_test():
-    testId = request.form['testid']
+    testId = safe_cast(request.form['testid'], int)
     tests.delete(testId)
     # delete_test(testId)
     return redirect(url_for('test_info'))
 
 @app.route('/test_info/update_testinfo', methods=['POST'])
 def update_testinfo():
-    subtest = request.form['subtest']
-    if subtest:
-        subtest = True if subtest.lower() == 'так' else False
-    values_on_update = {'testid': request.form['testid'],
-                        'instid': request.form['instid'],
-                        'testyear': request.form['testyear'],
-                        'adaptscale': request.form['adaptscale'],
-                        'ball12': request.form['ball12'],
-                        'ball100': request.form['ball100'],
-                        'ball': request.form['ball'],
-                        'subtest': subtest,
+    values_on_update = {'testid': safe_cast(request.form['testid'], int),
+                        'instid': safe_cast(request.form['instid'], int),
+                        'testyear': safe_cast(request.form['testyear'], int),
+                        'adaptscale': safe_cast(request.form['adaptscale'], int),
+                        'ball12': safe_cast(request.form['ball12'], float),
+                        'ball100': safe_cast(request.form['ball100'], float),
+                        'ball': safe_cast(request.form['ball'], float),
+                        'subtest': safe_cast(request.form['subtest'], lambda x: True if x.lower() == 'так' else False),
                         'outid': request.form['outid'],
                         'testname': request.form['testname'],
                         'dpalevel': request.form['dpalevel'],
@@ -342,44 +310,42 @@ def update_testinfo():
 # створити роут для вставки в базу
 @app.route('/add_data', methods=['GET', 'POST'])
 def add_data():
-    form = UpdateTables(request.form)
     if request.method == 'POST':
     # write here maps of forms
-        values = {'student_id': request.form.get("student_id"),
-        'student_birth': request.form.get("student_birth"),
-        'student_sex': request.form.get("student_sex"),
-        'student_area': request.form.get("student_area"),
-        'student_region': request.form.get("student_region"),
-        'student_ter': request.form.get("student_ter"),
-        'student_regtype': request.form.get("student_regtype"),
-        'class_profile': request.form.get("class_profile"),
-        'class_lang': request.form.get("class_lang"),
-        'student_inst_name': request.form.get("student_inst_name"),
-        'student_inst_area': request.form.get("student_inst_area"),
-        'student_inst_region': request.form.get("student_inst_region"),
-        'student_inst_ter': request.form.get("student_inst_ter"),
-        'student_inst_type': request.form.get("student_inst_type"),
-        'student_inst_parent': request.form.get("student_inst_parent"),
-        'test_name': request.form.get("test_name"),
-        'test_inst_name': request.form.get("test_inst_name"),
-        'test_inst_area': request.form.get("test_inst_area"),
-        'test_inst_region': request.form.get("test_inst_region"),
-        'test_inst_ter': request.form.get("test_inst_ter"),
-        'test_year': request.form.get("test_year"),
-        'adapt_scale': request.form.get("adapt_scale"),
-        'ball12': request.form.get("ball12"),
-        'ball100': request.form.get("ball100"),
-        'ball': request.form.get("ball"),
-        'subtest': request.form.get("subtest"),
-        'dpalevel': request.form.get("dpalevel"),
-        'test_lang': request.form.get("test_lang"),
-        'test_status': request.form.get("test_status")}
-
-        values['subtest'] = True if values['subtest'].lower() == 'так' else False 
+        values = {
+        'student_id': request.form["student_id"],
+        'student_birth': safe_cast(request.form["student_birth"], int),
+        'student_sex': request.form["student_sex"],
+        'student_area': request.form["student_area"],
+        'student_region': request.form["student_region"],
+        'student_ter': request.form["student_ter"],
+        'student_regtype': request.form["student_regtype"],
+        'class_profile': request.form["class_profile"],
+        'class_lang': request.form["class_lang"],
+        'student_inst_name': request.form["student_inst_name"],
+        'student_inst_area': request.form["student_inst_area"],
+        'student_inst_region': request.form["student_inst_region"],
+        'student_inst_ter': request.form["student_inst_ter"],
+        'student_inst_type': request.form["student_inst_type"],
+        'student_inst_parent': request.form["student_inst_parent"],
+        'test_name': request.form["test_name"],
+        'test_inst_name': request.form["test_inst_name"],
+        'test_inst_area': request.form["test_inst_area"],
+        'test_inst_region': request.form["test_inst_region"],
+        'test_inst_ter': request.form["test_inst_ter"],
+        'test_year': safe_cast(request.form["test_year"], int),
+        'adapt_scale': safe_cast(request.form["adapt_scale"], int),
+        'ball12': safe_cast(request.form["ball12"], float),
+        'ball100': safe_cast(request.form["ball100"], float),
+        'ball': safe_cast(request.form["ball"], float),
+        'subtest': safe_cast(request.form["subtest"], lambda x: True if x.lower() == 'так' else False),
+        'dpalevel': request.form["dpalevel"],
+        'test_lang': request.form["test_lang"],
+        'test_status': request.form["test_status"]}
 
         insert_data(values)
         return redirect(url_for('main_page'))
-    return render_template('addNew.html', form=form, action='add_data')
+    return render_template('addNew.html')
 
 
 @app.route('/statistics', methods=['GET', 'POST'])

@@ -45,6 +45,8 @@ services:
         volumes:
             - './result_app/result_output:/result_app/result_output'
     webapp:
+        environment:
+            - DB=MONGO
         depends_on:
             - db
             - redis

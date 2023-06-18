@@ -9,6 +9,6 @@ load_dotenv(path.join(basedir, '.env'))
 class Config:
     # General Config
     SECRET_KEY = environ.get("SECRET_KEY")
- 
+    DB=environ.get("DB")
     # Database
     SQLALCHEMY_DATABASE_URI = environ.get('SQLALCHEMY_DATABASE_URI')

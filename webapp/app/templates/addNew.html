@@ -9,8 +9,7 @@
 <nav class="navbtn">
     <a href="{{ url_for('main_page') }}" class="bar-item">Home</a>
 </nav>
-    <form>
-		{{ form.hidden_tag() }}
+    <form action = "{{ url_for('add_data') }}" method="POST">
 		<div class="row">
         	<div class="column">
 				<label for="student_id">student_id :</label>
