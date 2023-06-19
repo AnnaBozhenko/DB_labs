@@ -18,15 +18,6 @@ statistic_funcs = {"min": func.min(Test.c.ball100),
                    "max": func.max(Test.c.ball100),
                    "avg": func.avg(Test.c.ball100)}
 
-def timer(func):
-    @functools.wraps(func)
-    def inner(*args, **kwargs):
-        start_time = perf_counter()
-        result = func(*args, **kwargs)
-        print(f"Finished {func.__name__!r} in {(perf_counter() - start_time):.4f} seconds")
-        return result
-    return inner
-
 
 class PGLocationInfo:
     def insert(cls, values):
@@ -259,45 +250,60 @@ class PGTest:
         return tests
 
 
-@timer
-def get_statistics(years, regions, subject, ball_function, teststatus):
-    """give statistics on query with given years, region names, subject, 
-    ball_function (min/max/average), teststatus(зараховано/не зараховано)"""
-    result = []
-    uncached_combinations = []
-    for year in years:
-        for region in regions:
-            key = f"{subject}_{year}_{region}_{ball_function}"
-            # key = sha224(key.encode()).hexdigest()
-            ball = redisClient.get(key)
-            if ball is not None:
-                result.append((year, region, float(ball)))
-            else:
-                uncached_combinations.append((year, region))
-
-    if result:
-        print("cache retrieved")
-    if uncached_combinations:
-        with engine.connect() as conn:
-            for constraint in uncached_combinations:
-                query = select(Test.c.testyear, LocationInfo.c.regname, func.round(statistic_funcs[ball_function], 2)) \
-                        .where(Test.c.outid == Student.c.outid, Student.c.locationid == LocationInfo.c.locationid) \
-                        .where(Test.c.testyear == constraint[0], 
-                               LocationInfo.c.regname == constraint[1], 
-                               Test.c.testname == subject, 
-                               Test.c.teststatus == teststatus) \
-                        .group_by(LocationInfo.c.regname, Test.c.testyear)
-                statistics = conn.execute(query).all()
-                for s in statistics:
-                    # write to cache
-                    key = f"{subject}_{s[0]}_{s[1]}_{ball_function}"
-                    # key = sha224(key.encode()).hexdigest()
-                    ball = float(s[2])
-                    redisClient.set(name=key, value=ball, ex=CACHELIFETIME)
-                    result.append(s)
-    print("result:")
-    [print(x) for x in result]
+def get_statistics(constraint):
+    ball_function = constraint["ball_function"]
+    result = None
+    with engine.connect() as conn:
+        query = select(Test.c.testyear, LocationInfo.c.regname, func.round(statistic_funcs[ball_function], 2)) \
+                .where(Test.c.outid == Student.c.outid, Student.c.locationid == LocationInfo.c.locationid) \
+                .where(Test.c.testyear == constraint["testyear"], 
+                       LocationInfo.c.regname == constraint["regname"], 
+                       Test.c.testname == constraint["subject"], 
+                       Test.c.teststatus == constraint["teststatus"]) \
+                .group_by(LocationInfo.c.regname, Test.c.testyear)
+        result = conn.execute(query).all()
     return result
+
+
+# @timer
+# def get_statistics(years, regions, subject, ball_function, teststatus):
+#     """give statistics on query with given years, region names, subject, 
+#     ball_function (min/max/average), teststatus(зараховано/не зараховано)"""
+#     result = []
+#     uncached_combinations = []
+#     for year in years:
+#         for region in regions:
+#             key = f"{subject}_{year}_{region}_{ball_function}"
+#             # key = sha224(key.encode()).hexdigest()
+#             ball = redisClient.get(key)
+#             if ball is not None:
+#                 result.append((year, region, float(ball)))
+#             else:
+#                 uncached_combinations.append((year, region))
+
+#     if result:
+#         print("cache retrieved")
+#     if uncached_combinations:
+#         with engine.connect() as conn:
+#             for constraint in uncached_combinations:
+#                 query = select(Test.c.testyear, LocationInfo.c.regname, func.round(statistic_funcs[ball_function], 2)) \
+#                         .where(Test.c.outid == Student.c.outid, Student.c.locationid == LocationInfo.c.locationid) \
+#                         .where(Test.c.testyear == constraint[0], 
+#                                LocationInfo.c.regname == constraint[1], 
+#                                Test.c.testname == subject, 
+#                                Test.c.teststatus == teststatus) \
+#                         .group_by(LocationInfo.c.regname, Test.c.testyear)
+#                 statistics = conn.execute(query).all()
+#                 for s in statistics:
+#                     # write to cache
+#                     key = f"{subject}_{s[0]}_{s[1]}_{ball_function}"
+#                     # key = sha224(key.encode()).hexdigest()
+#                     ball = float(s[2])
+#                     redisClient.set(name=key, value=ball, ex=CACHELIFETIME)
+#                     result.append(s)
+#     print("result:")
+#     [print(x) for x in result]
+#     return result
                 
 
 def insert_data(values):

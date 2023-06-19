@@ -214,7 +214,7 @@ class MongoInstitution:
 
     def update(cls, doc):
         try:
-            if 'locationid' in doc.keys() and not MongoLocationInfo.exists(doc['locationid']):
+            if 'locationid' in doc.keys() and doc['locationid'] and not MongoLocationInfo.exists(doc['locationid']):
                 raise Exception("Location is not present in the database")
             doc = get_valid_fields(doc)
             cls.col.update_one({'instid': doc['instid']}, {'$set': doc})
@@ -294,9 +294,9 @@ class MongoStudent:
 
     def update(cls, doc):
         try:
-            if 'locationid' in doc.keys() and not MongoLocationInfo.exists(doc['locationid']):
+            if 'locationid' in doc.keys() and doc['locationid'] and not MongoLocationInfo.exists(doc['locationid']):
                 raise Exception("Location is not present in the database")
-            if 'instid' in doc.keys() and not MongoInstitution.exists(doc['instid']):
+            if 'instid' in doc.keys() and doc['instid'] and not MongoInstitution.exists(doc['instid']):
                 raise Exception("Institution is not present in the database")
             doc = get_valid_fields(doc)
             cls.col.update_one({'outid': doc['outid']}, {'$set': doc})
@@ -396,9 +396,9 @@ class MongoTest:
 
     def update(cls, doc):
         try:                
-            if 'instid' in doc.keys() and not MongoInstitution.exists(doc['instid']):
+            if 'instid' in doc.keys() and doc['instid'] and not MongoInstitution.exists(doc['instid']):
                 raise Exception("Institution is not present in the database")
-            if 'outid' in doc.keys() and not MongoStudent.exists(doc['outid']):
+            if 'outid' in doc.keys() and doc['outid'] and not MongoStudent.exists(doc['outid']):
                 raise Exception("Student is not present in the database")
             doc = get_valid_fields(doc)
             cls.col.update_one({'testid': doc['testid']}, {'$set': doc})
@@ -430,9 +430,9 @@ class MongoTest:
         return result
 
 # needs realization
-def get_statistics(years, regions, subject, ball_function, teststatus):
+def get_statistics(constraint):
     # get test ball 
-    ball_function = "$" + ball_function.lower()
+    ball_function = "$" + constraint["ball_function"].lower()
     query = mongo_db["collStudent"].aggregate([{
         "$lookup": {
             "from": "collLocationInfo", 
@@ -469,10 +469,10 @@ def get_statistics(years, regions, subject, ball_function, teststatus):
             }
         },
         { "$match": {
-            "testname": subject,
-            "regname": {"$in": regions},
-            "testyear": {"$in": years},
-            "teststatus": teststatus
+            "testname": constraint["subject"],
+            "regname":  constraint["regname"],
+            "testyear":  constraint["testyear"],
+            "teststatus": constraint["teststatus"]
             }
         },
         { "$group" : {
@@ -494,10 +494,8 @@ def get_statistics(years, regions, subject, ball_function, teststatus):
     
 
 def run_migrations():
-    mongo_db["collLocationInfo"].drop()
-    mongo_db["collInstitution"].drop()
-    mongo_db["collStudent"].drop()
-    mongo_db["collTest"].drop()
+    if mongo_db["collLocationInfo"].find().explain().get("executionStats", {}).get("nReturned") > 0:
+        pass
     migrate(query_locationinfo, "collLocationInfo")
     migrate(query_institution, "collInstitution")
     migrate(query_student, "collStudent")
