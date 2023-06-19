@@ -48,7 +48,7 @@
         {% endfor %}
           <th>
       <form action="{{url_for('del_institution')}}" method="POST">
-								<input type="hidden" name="instid" value="{{ institution.instid }}"/>
+								<input type="hidden" name="instid" value="{{ institution[-1] }}"/>
                                 <button class="delete_btn" type="submit">Delete</button>
 							</form></th>
         </tr>

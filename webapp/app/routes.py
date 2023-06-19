@@ -1,11 +1,11 @@
 from flask import redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SubmitField,  SelectField, SelectMultipleField
-from . import app, locations, institutions, students, tests
+from . import app, locations, institutions, students, tests, get_statistics
 # from .models import get_statistics, get_locationinfo, insert_data, get_institution, get_student, get_test, delete_location, \
 #     delete_institution, delete_student, delete_test, insert_institution, insert_student, insert_test, update_location, update_institution, \
 #     update_student, update_test, insert_location, LocationInfo, Institution, Student, Test
-from .models import PGLocationInfo, PGInstitution, PGStudent, PGTest, get_statistics, insert_data
+from .models import PGLocationInfo, PGInstitution, PGStudent, PGTest, insert_data
 
 # from sqlalchemy import MetaData, Table, insert, select, update, func, delete, desc, ForeignKey
 # from .mongoModels import MongoLocationInfo, MongoInstitution, MongoStudent, MongoTest
@@ -111,7 +111,7 @@ class Statistic(FlaskForm):
 def safe_cast(val, to_type, default=None):
     try:
         return to_type(val)
-    except (ValueError, TypeError):
+    except Exception:
         return default
 
 @app.route('/', methods=['GET', 'POST'])
@@ -196,7 +196,6 @@ def update_institutioninfo():
 @app.route('/institution_info/del_institution', methods=['POST'])
 def del_institution():
     inst_Id = safe_cast(request.form['instid'], int)
-    print(f"delete {inst_Id}, type: {type(inst_Id)}")
     institutions.delete(inst_Id)
     # delete_institution(inst_Id)
     return redirect(url_for('institution_info'))
@@ -363,6 +362,7 @@ def statistics():
         print(subject)
         print(years)
         print(regions)
+        print(ball_function)
         if 'all' in regions:
             regions = reg_all
         result = get_statistics(years=years, regions=regions, subjects=subject, ball_function=ball_function, teststatus='Зараховано')

@@ -50,7 +50,7 @@
         {% endfor %}
         <th>
           <form action="{{url_for('del_location')}}" method="POST">
-						<input type="hidden" name="locationid" value="{{ location.locationid }}"/>
+						<input type="hidden" name="locationid" value="{{ location[-1] }}"/>
             <button class="delete_btn" type="submit">Delete</button>
 					</form>
         </th>

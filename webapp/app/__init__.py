@@ -17,12 +17,14 @@ if DB == "MONGO":
     institutions = mongo_logics.MongoInstitution()
     students = mongo_logics.MongoStudent()
     tests = mongo_logics.MongoTest()
+    get_statistics = mongo_logics.get_statistics
 else:
     from . import models
     locations = models.PGLocationInfo()
     institutions = models.PGInstitution()
     students = models.PGStudent()
     tests = models.PGTest()    
+    get_statistics = models.get_statistics
 
 from . import routes
 

@@ -137,14 +137,13 @@ class MongoLocationInfo:
         
 
     def delete(cls, locationid):
-        return cls.col.delete_one({'locationid': locationid})
+        print("on delete")
+        print(locationid)
+        cls.col.delete_one({'locationid': locationid})
 
 
     def update(cls, doc):
         doc = get_valid_fields(doc)
-        print("inside update:")
-        print("doc:")
-        print(doc)
         cls.col.update_one({'locationid': doc['locationid']}, {'$set': doc})
 
     @classmethod
@@ -208,6 +207,8 @@ class MongoInstitution:
 
 
     def delete(cls, instid):
+        print("on delete:")
+        print(instid)
         cls.col.delete_one({'instid': instid})
     
 
@@ -412,7 +413,7 @@ class MongoTest:
         return False
 
     def info(cls):
-        res = cls.col.find({}, {"_id": 0})
+        res = cls.col.find({}, {"_id": 0}, sort=[("testid", -1)])
         result = [[ el["instid"],
                     el["testyear"],
                     el["adaptscale"],
@@ -429,8 +430,60 @@ class MongoTest:
         return result
 
 # needs realization
-def get_statistics():
-    pass
+def get_statistics(years, regions, subjects, ball_function, teststatus):
+    # get test ball 
+    ball_function = "$" + ball_function
+    query = mongo_db["collStudent"].aggregate([{
+        "$lookup": {
+            "from": "collLocationInfo", 
+            "localField": "locationid", 
+            "foreignField": "locationid", 
+            "as": "location"
+            }
+        }, 
+        {"$lookup": {
+            "from": "collTest",
+            "localField": "outid",
+            "foreignField": "outid",
+            "as": "test"
+        }},
+        {
+            "$project": {
+                "regname": "$location.regname",
+                "testname": "$test.testname",
+                "testyear": "$test.testyear",
+                "ball100": "$test.ball100",
+                "teststatus": "$test.teststatus"
+            }
+        }, 
+        {"$unwind": "$regname"},
+        {"$unwind": "$testname"},
+        {"$unwind": "$testyear"},
+        {"$unwind": "$ball100"},
+        {"$unwind": "$teststatus"},
+        { "$match": {
+            "testname": {"$in": subjects},
+            "regname": {"$in": regions},
+            "testyear": {"$in": years},
+            "teststatus": teststatus
+            }
+        },
+        { "$group" : {
+            "_id": {
+                "testyear": "$testyear", 
+                "regname": "$regname"
+            },
+            "ball": {
+                ball_function: "$ball100"
+            }
+        }}])
+    
+    result = []
+    for row in query:
+        x = list(row.values())
+        print(x)
+        result.insert(list(x[0].values()) + x[-1])
+    return result
     
 
 def run_migrations():
@@ -443,3 +496,16 @@ def run_migrations():
     migrate(query_student, "collStudent")
     migrate(query_test, "collTest")
  
+"""
+a.
+db.a.aggregate([{$match: {"testname": "ukr"}}, {$group: {_id: {testyear: "$testyear", areaname: "$student.location.areaname"}, 'avgball': {$avg: "$testball"} }}])
+
+in testyear:
+ db.a.aggregate([{$match: {"testname": "ukr", "testyear": {$in: [2003, 2009]}}}, {$group: {_id: {testyear: "$testyear", areaname: "$student.location.areaname"}, 'avgball': {$avg: "$testball"} }}])
+
+ added area:
+ db.a.aggregate([{$match: {"testname": "ukr", "testyear": {$in: [2003, 2009]}, "student.location.areaname": {$in: ['odeska', 'poltavska']}}}, {$group: {_id: 
+{testyear: "$testyear", areaname: "$student.location.areaname"}, 'avgball': {$avg: "$testball"} }}])
+
+
+"""
