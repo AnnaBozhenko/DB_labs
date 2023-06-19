@@ -365,5 +365,6 @@ def statistics():
         print(ball_function)
         if 'all' in regions:
             regions = reg_all
+        years = [safe_cast(year, int) for year in years]
         result = get_statistics(years=years, regions=regions, subjects=subject, ball_function=ball_function, teststatus='Зараховано')
     return render_template('statistics.html', form=form, headers=headers, statistics_data=result)

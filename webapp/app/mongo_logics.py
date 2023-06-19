@@ -482,7 +482,7 @@ def get_statistics(years, regions, subjects, ball_function, teststatus):
     for row in query:
         x = list(row.values())
         print(x)
-        result.insert(list(x[0].values()) + x[-1])
+        result.insert(list(x[0].values()) + [x[-1]])
     return result
     
 
