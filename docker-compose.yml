@@ -46,7 +46,7 @@ services:
             - './result_app/result_output:/result_app/result_output'
     webapp:
         environment:
-            - DB=MONGO
+            - DB=MONG
         depends_on:
             - db
             - redis

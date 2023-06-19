@@ -430,9 +430,9 @@ class MongoTest:
         return result
 
 # needs realization
-def get_statistics(years, regions, subjects, ball_function, teststatus):
+def get_statistics(years, regions, subject, ball_function, teststatus):
     # get test ball 
-    ball_function = "$" + ball_function
+    ball_function = "$" + ball_function.lower()
     query = mongo_db["collStudent"].aggregate([{
         "$lookup": {
             "from": "collLocationInfo", 
@@ -441,12 +441,24 @@ def get_statistics(years, regions, subjects, ball_function, teststatus):
             "as": "location"
             }
         }, 
+        {
+            "$unwind": {
+                "path": "$location",
+                "preserveNullAndEmptyArrays": False
+            }
+        },
         {"$lookup": {
             "from": "collTest",
             "localField": "outid",
             "foreignField": "outid",
             "as": "test"
         }},
+        {
+            "$unwind": {
+                "path": "$test",
+                "preserveNullAndEmptyArrays": False
+                }
+        },
         {
             "$project": {
                 "regname": "$location.regname",
@@ -455,14 +467,9 @@ def get_statistics(years, regions, subjects, ball_function, teststatus):
                 "ball100": "$test.ball100",
                 "teststatus": "$test.teststatus"
             }
-        }, 
-        {"$unwind": "$regname"},
-        {"$unwind": "$testname"},
-        {"$unwind": "$testyear"},
-        {"$unwind": "$ball100"},
-        {"$unwind": "$teststatus"},
+        },
         { "$match": {
-            "testname": {"$in": subjects},
+            "testname": subject,
             "regname": {"$in": regions},
             "testyear": {"$in": years},
             "teststatus": teststatus
@@ -482,7 +489,7 @@ def get_statistics(years, regions, subjects, ball_function, teststatus):
     for row in query:
         x = list(row.values())
         print(x)
-        result.insert(list(x[0].values()) + [x[-1]])
+        result.append(list(x[0].values()) + [x[-1]])
     return result
     
 

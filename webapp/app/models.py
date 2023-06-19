@@ -260,14 +260,14 @@ class PGTest:
 
 
 @timer
-def get_statistics(years, regions, subjects, ball_function, teststatus):
-    """give statistics on query with given years, regin names subjects, 
+def get_statistics(years, regions, subject, ball_function, teststatus):
+    """give statistics on query with given years, region names, subject, 
     ball_function (min/max/average), teststatus(зараховано/не зараховано)"""
     result = []
     uncached_combinations = []
     for year in years:
         for region in regions:
-            key = f"{year}_{region}_{ball_function}"
+            key = f"{subject}_{year}_{region}_{ball_function}"
             # key = sha224(key.encode()).hexdigest()
             ball = redisClient.get(key)
             if ball is not None:
@@ -281,22 +281,22 @@ def get_statistics(years, regions, subjects, ball_function, teststatus):
         with engine.connect() as conn:
             for constraint in uncached_combinations:
                 query = select(Test.c.testyear, LocationInfo.c.regname, func.round(statistic_funcs[ball_function], 2)) \
-                        .where(Test.c.instid == Institution.c.instid, Institution.c.locationid == LocationInfo.c.locationid) \
+                        .where(Test.c.outid == Student.c.outid, Student.c.locationid == LocationInfo.c.locationid) \
                         .where(Test.c.testyear == constraint[0], 
                                LocationInfo.c.regname == constraint[1], 
-                               Test.c.testname.in_(subjects), 
+                               Test.c.testname == subject, 
                                Test.c.teststatus == teststatus) \
                         .group_by(LocationInfo.c.regname, Test.c.testyear)
                 statistics = conn.execute(query).all()
-                print("result:")
-                [print(s) for s in statistics]
                 for s in statistics:
                     # write to cache
-                    key = f"{s[0]}_{s[1]}_{ball_function}"
+                    key = f"{subject}_{s[0]}_{s[1]}_{ball_function}"
                     # key = sha224(key.encode()).hexdigest()
                     ball = float(s[2])
                     redisClient.set(name=key, value=ball, ex=CACHELIFETIME)
                     result.append(s)
+    print("result:")
+    [print(x) for x in result]
     return result
                 
 
