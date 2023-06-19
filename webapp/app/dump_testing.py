@@ -20,7 +20,7 @@ db_host = "db"
 # db_name = "test"
 # db_host = "localhost"
 
-rows_to_write_numb = 100
+rows_to_write_numb = 1000
 extract_data = [(2016, "./data/OpenData2016.csv", "cp1251"),
                 (2017, "./data/OpenData2017.csv", "utf-8-sig"),
                 (2018, "./data/OpenData2018.csv", "utf-8-sig"),

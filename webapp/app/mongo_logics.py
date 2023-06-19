@@ -5,7 +5,7 @@ POSTGRES_DB = "ZNO"
 POSTGRES_USER= "Student"
 POSTGRES_PASSWORD = "qwerty"
 POSTGRES_HOST = "db"
-chunk = 100
+chunk = 1000
 client = pymongo.MongoClient("mongodb://user:pass@mongodb:27017/")
 mongo_db = client["ZNO"]
 
@@ -82,7 +82,7 @@ def migrate(query, collection_name):
         pass
     finally:
         if conn:
-            print("Table was migrated to collection")
+            print(f"Table was migrated to collection {collection_name}")
             conn.close()
 
 
@@ -119,6 +119,7 @@ class MongoLocationInfo:
             cls.col = mongo_db.create_collection('collLocationInfo', validator=cls.validator, validationAction="error")
             cls.locationid = 0
         else:
+            mongo_db.command({"collMod": "collLocationInfo", "validator": cls.validator, "validationLevel": "moderate", "validationAction": "error"})
             cls.col = mongo_db["collLocationInfo"]
             doc_with_max_locationid = cls.col.find_one(sort=[("locationid", -1)])
             cls.locationid = doc_with_max_locationid['locationid'] if doc_with_max_locationid else 0
@@ -187,6 +188,7 @@ class MongoInstitution:
             cls.col = mongo_db.create_collection('collInstitution', validator=cls.validator, validationAction="error")
             cls.instid = 0
         else:
+            mongo_db.command({"collMod": "collInstitution", "validator": cls.validator, "validationLevel": "moderate", "validationAction": "error"})
             cls.col = mongo_db["collInstitution"]
             doc_with_max_instid = cls.col.find_one(sort=[("instid", -1)])
             cls.instid = doc_with_max_instid['instid'] if doc_with_max_instid else 0
@@ -271,6 +273,7 @@ class MongoStudent:
         if "collStudent" not in mongo_db.list_collection_names():  
             cls.col = mongo_db.create_collection('collStudent', validator=cls.validator, validationAction="error")
         else:
+            mongo_db.command({"collMod": "collStudent", "validator": cls.validator, "validationLevel": "moderate", "validationAction": "error"})
             cls.col = mongo_db["collStudent"]
 
 
@@ -369,6 +372,7 @@ class MongoTest:
             cls.col = mongo_db.create_collection('collTest', validator=cls.validator, validationAction="error")
             cls.testid = 0
         else:
+            mongo_db.command({"collMod": "collTest", "validator": cls.validator, "validationLevel": "moderate", "validationAction": "error"})
             cls.col = mongo_db["collTest"]
             doc_with_max_testid = cls.col.find_one(sort=[("testid", -1)])
             cls.testid = doc_with_max_testid['testid'] if doc_with_max_testid else 0
@@ -494,23 +498,11 @@ def get_statistics(constraint):
     
 
 def run_migrations():
-    if mongo_db["collLocationInfo"].find().explain().get("executionStats", {}).get("nReturned") > 0:
-        pass
-    migrate(query_locationinfo, "collLocationInfo")
-    migrate(query_institution, "collInstitution")
-    migrate(query_student, "collStudent")
-    migrate(query_test, "collTest")
+    print("migrations started...")
+    t_names = ["LocationInfo", "Institution", "Student", "Test"] 
+    t_queries = [query_locationinfo, query_institution, query_student, query_test]
+    for t_name, t_query in zip(t_names, t_queries):
+        if mongo_db[f"coll{t_name}"].find().explain().get("executionStats", {}).get("nReturned") == 0:
+            migrate(t_query, f"coll{t_name}")
+    
  
-"""
-a.
-db.a.aggregate([{$match: {"testname": "ukr"}}, {$group: {_id: {testyear: "$testyear", areaname: "$student.location.areaname"}, 'avgball': {$avg: "$testball"} }}])
-
-in testyear:
- db.a.aggregate([{$match: {"testname": "ukr", "testyear": {$in: [2003, 2009]}}}, {$group: {_id: {testyear: "$testyear", areaname: "$student.location.areaname"}, 'avgball': {$avg: "$testball"} }}])
-
- added area:
- db.a.aggregate([{$match: {"testname": "ukr", "testyear": {$in: [2003, 2009]}, "student.location.areaname": {$in: ['odeska', 'poltavska']}}}, {$group: {_id: 
-{testyear: "$testyear", areaname: "$student.location.areaname"}, 'avgball': {$avg: "$testball"} }}])
-
-
-"""
